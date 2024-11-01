@@ -2,7 +2,7 @@
 GET http://localhost:3000/api/v2/pedido
 
 ### obtener todos los pedidos sin pago
-GET http://localhost:3000/api/v2/pedido/pedidos/no-pagos
+GET http://localhost:3000/api/v2/pedido/pedidos/impagos
 
 ### crear un nuevo pedido
 # @name createPedido
@@ -19,7 +19,7 @@ Content-Type: application/json
 @nroPedido = {{createPedido.response.body.data.nroPedido}}
 
 ### obtener un pedido
-GET http://localhost:3000/api/v2/pedido/{{nroPedido}}
+GET http://localhost:3000/api/v2/pedido/1
 
 ### modificar un pedido (PUT - recurso completo e idempotente)
 PUT http://localhost:3000/api/v2/pedido/{{nroPedido}}

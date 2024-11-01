@@ -9,4 +9,4 @@ pedidoRouter.post('/', add)
 pedidoRouter.put('/:nroPedido', update)
 pedidoRouter.patch('/:nroPedido', update)
 pedidoRouter.delete('/:nroPedido', remove)
-pedidoRouter.get('/pedidos/no-pagos', findPedidosSinPago);
+pedidoRouter.get('/pedidos/impagos', findPedidosSinPago);
