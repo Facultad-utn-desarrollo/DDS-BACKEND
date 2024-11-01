@@ -17,6 +17,14 @@ async function findAll(req: Request, res: Response) {
   }
 }
 
+async function findPedidosSinPago(req: Request, res: Response) {
+  try {
+    const pedidosSinPago = await em.find(Pedido, { pago: null });
+    res.status(200).json({ message: 'Se encontraron los pedidos sin pago!', data: pedidosSinPago });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+}
 
 async function findOne(req: Request, res: Response) {
   try {
@@ -32,38 +40,38 @@ async function findOne(req: Request, res: Response) {
 
 
 async function add(req: Request, res: Response) {
-    try {
-        const { total, cliente, fecha, lineas } = req.body;
+  try {
+    const { total, cliente, fecha, lineas } = req.body;
 
-        // Crear una nueva instancia de Pedido
-        const pedido = new Pedido(); 
-        pedido.total = total;
-        pedido.fecha = new Date(); // Usa la fecha actual o convierte desde el cuerpo de la solicitud
-        pedido.cliente = cliente; // Asegúrate de que el cliente también sea una instancia válida
+    // Crear una nueva instancia de Pedido
+    const pedido = new Pedido();
+    pedido.total = total;
+    pedido.fecha = new Date(); // Usa la fecha actual o convierte desde el cuerpo de la solicitud
+    pedido.cliente = cliente; // Asegúrate de que el cliente también sea una instancia válida
 
-        // Agregar cada línea de producto al pedido
-        for (const linea of lineas) {
-            const lineaDeProducto = new LineaDeProducto();
-            lineaDeProducto.cantidad = linea.cantidad;
-            lineaDeProducto.subtotal = linea.subtotal;
+    // Agregar cada línea de producto al pedido
+    for (const linea of lineas) {
+      const lineaDeProducto = new LineaDeProducto();
+      lineaDeProducto.cantidad = linea.cantidad;
+      lineaDeProducto.subtotal = linea.subtotal;
 
-            // Encontrar el producto por su código
-            const productoEntity = await em.findOneOrFail(Producto, { codigo: linea.producto.codigo });
+      // Encontrar el producto por su código
+      const productoEntity = await em.findOneOrFail(Producto, { codigo: linea.producto.codigo });
 
-            // Asignar el producto a la línea
-            lineaDeProducto.producto = productoEntity;
+      // Asignar el producto a la línea
+      lineaDeProducto.producto = productoEntity;
 
-            // Agregar la línea de producto al pedido
-            pedido.lineas.add(lineaDeProducto);
-        }
-
-        // Guardar el pedido
-        await em.persistAndFlush(pedido);
-
-        res.status(201).json({ message: 'Pedido creado con éxito!' });
-    } catch (error: any) {
-        res.status(500).json({ message: error.message });
+      // Agregar la línea de producto al pedido
+      pedido.lineas.add(lineaDeProducto);
     }
+
+    // Guardar el pedido
+    await em.persistAndFlush(pedido);
+
+    res.status(201).json({ message: 'Pedido creado con éxito!' });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
 }
 
 
@@ -97,5 +105,6 @@ export {
   , findOne,
   add,
   update,
-  remove
+  remove,
+  findPedidosSinPago
 }
