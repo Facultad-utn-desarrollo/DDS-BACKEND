@@ -19,6 +19,7 @@ async function add(req: Request, res: Response) {
   try {
     const { tipoPago, pedido, ...pagoData } = req.body; // Obtener el pedido del cuerpo de la solicitud
     let tipoPagoEntity;
+    let pedidoEntity;
 
     if (tipoPago?.id) {
       tipoPagoEntity = await em.findOne(TipoPago, tipoPago.id);
@@ -32,14 +33,28 @@ async function add(req: Request, res: Response) {
       });
     }
 
-    // Asignar el pedido existente al pago
-    const pedidoEntity = await em.findOne(Pedido, { nroPedido: pedido.nro_pedido });
-    if (!pedidoEntity) {
-      return res.status(404).json({ message: 'Pedido no encontrado' });
+
+    if (pedido?.nroPedido) {
+      pedidoEntity = await em.findOne(Pedido, pedido.nroPedido);
+      if (!pedidoEntity) {
+        return res.status(404).json({ message: 'Pedido no encontrado' });
+      }
+
+      if (pedidoEntity.pago) {
+        return res.status(400).json({ message: 'El pedido ya tiene un pago asociado' });
+      }
     }
 
     let pago = em.create(Pago, { ...pagoData, tipoPago: tipoPagoEntity, pedido: pedidoEntity });
+
     await em.persistAndFlush(pago);
+
+    // NO FUNCIONA LA ASIGNACION DEL PAGO AL PEDIDO, DEL LADOD EL PEDIDO SIGUE DICEINDO QUE NO TIENE PAGO
+    /*if (pedidoEntity) {
+      pedidoEntity.pago = pago;
+      await em.persistAndFlush(pedidoEntity);
+    }*/
+
     res.status(201).json({ message: 'Pago creado!', data: pago });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
