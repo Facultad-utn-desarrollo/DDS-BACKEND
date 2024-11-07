@@ -21,7 +21,7 @@ export class Pedido {
     @ManyToOne({ entity: () => Entrega, nullable: true })
     entrega!: Rel<Entrega>;
 
-    @OneToOne(() => Pago, { nullable: true })
+    @OneToOne(() => Pago, {nullable: true, eager: true })
     pago!: Rel<Pago>;
 
     @OneToMany(() => LineaDeProducto, lineaDeProducto => lineaDeProducto.pedido, { mappedBy: lineaDeProducto => lineaDeProducto.pedido, cascade: [Cascade.ALL] })

@@ -1,4 +1,4 @@
-import { Entity, ManyToOne, PrimaryKey, Property, Rel, OneToOne } from "@mikro-orm/core";
+import { Entity, ManyToOne, PrimaryKey, Property, Rel, OneToOne, Cascade } from "@mikro-orm/core";
 import { TipoPago } from "./tipoPago.entity.js";
 import { Pedido } from "./pedido.entity.js";
 
@@ -13,7 +13,7 @@ export class Pago {
     @ManyToOne({ entity: () => TipoPago, nullable: false })
     tipoPago!: Rel<TipoPago>;
 
-    @OneToOne(() => Pedido, { nullable: false })
+    @OneToOne(() => Pedido, { nullable: false, cascade: [Cascade.PERSIST, Cascade.MERGE] })
     pedido!: Rel<Pedido>;
 
     /*constructor(

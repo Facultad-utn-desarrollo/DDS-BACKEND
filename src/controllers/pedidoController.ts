@@ -3,6 +3,7 @@ import { orm } from '../shared/db/orm.js'
 import { Pedido } from '../models/pedido.entity.js'
 import { LineaDeProducto } from '../models/lineaDeProducto.entity.js'
 import { Producto } from '../models/producto.entity.js'
+import { Entrega } from '../models/entrega.entity.js'
 
 const em = orm.em
 
@@ -91,14 +92,42 @@ async function update(req: Request, res: Response) {
 
 async function remove(req: Request, res: Response) {
   try {
-    const nroPedido = Number.parseInt(req.params.nroPedido)
-    const pedido = await em.findOneOrFail(Pedido, { nroPedido })
-    await em.removeAndFlush(pedido)
-    res.status(200).json({ message: 'Pedido borrado!' })
+    const nroPedido = Number.parseInt(req.params.nroPedido);
+
+    // Buscamos el pedido en la base de datos y aseguramos que la colección 'lineas' esté cargada
+    const pedido = await em.findOneOrFail(Pedido, { nroPedido }, { populate: ['lineas'] });
+
+    // Si el pedido tiene un pago, lo eliminamos primero
+    if (pedido.pago) {
+      await em.removeAndFlush(pedido.pago);
+    }
+
+    // Si el pedido tiene una entrega asociada
+    if (pedido.entrega) {
+      const entrega = await em.findOneOrFail(Entrega, { id: pedido.entrega.id });
+
+      // Eliminar el pedido de la lista de pedidos en la entrega
+      entrega.pedidos.remove(pedido);
+      await em.flush();  // Guardamos los cambios en la entrega (ya no tiene ese pedido)
+    }
+
+    // Eliminar las líneas de productos asociadas al pedido
+    if (pedido.lineas && pedido.lineas.isInitialized()) {
+      await em.removeAndFlush(pedido.lineas.getItems());
+    }
+
+    // Finalmente, eliminamos el pedido
+    await em.removeAndFlush(pedido);
+
+    // Enviamos la respuesta de éxito
+    res.status(200).json({ message: 'Pedido, pago, lineas de productos y relación de entrega eliminados correctamente.' });
   } catch (error: any) {
-    res.status(500).json({ message: error.message })
+    res.status(500).json({ message: error.message });
   }
 }
+
+
+
 
 export {
   findAll
