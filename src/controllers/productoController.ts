@@ -7,7 +7,7 @@ const em = orm.em
 
 async function findAll(req: Request, res: Response) {
   try {
-    const productos = await em.find(Producto, {})
+    const productos = await em.find(Producto, {}, { populate: ['tipoProducto'] })
     res
       .status(200)
       .json({productos: productos })
