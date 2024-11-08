@@ -23,16 +23,5 @@ export class Entrega {
     @OneToMany(() => Pedido, (pedido) => pedido.entrega, { cascade: [Cascade.ALL], })
     pedidos = new Collection<Pedido>(this)
 
-    /*constructor(
-        fecha: Date,
-        lote: number,
-        zona: string,
-        repartidor: Repartidor
-    ) {
-        this.fecha = fecha;
-        this.lote = lote;
-        this.zona = zona;
-        this.repartidor = repartidor;
-    }*/
 
 }

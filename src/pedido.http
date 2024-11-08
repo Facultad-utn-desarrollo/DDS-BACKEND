@@ -4,6 +4,9 @@ GET http://localhost:3000/api/v2/pedido
 ### obtener todos los pedidos sin pago
 GET http://localhost:3000/api/v2/pedido/pedidos/impagos
 
+### obtener todos los pedidos con pago y sin entrega
+GET http://localhost:3000/api/v2/pedido/pedidos/noentregados
+
 ### crear un nuevo pedido
 # @name createPedido
 POST http://localhost:3000/api/v2/pedido

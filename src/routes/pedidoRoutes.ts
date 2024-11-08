@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { findAll, findOne, add, update, remove, findPedidosSinPago } from '../controllers/pedidoController.js';
+import { findAll, findOne, add, update, remove, findPedidosSinPago, findPedidosPagosSinEntrega } from '../controllers/pedidoController.js';
 
 export const pedidoRouter = Router()
 
@@ -10,3 +10,4 @@ pedidoRouter.put('/:nroPedido', update)
 pedidoRouter.patch('/:nroPedido', update)
 pedidoRouter.delete('/:nroPedido', remove)
 pedidoRouter.get('/pedidos/impagos', findPedidosSinPago);
+pedidoRouter.get('/pedidos/noentregados', findPedidosPagosSinEntrega);

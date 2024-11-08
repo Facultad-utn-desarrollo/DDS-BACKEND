@@ -27,6 +27,16 @@ async function findPedidosSinPago(req: Request, res: Response) {
   }
 }
 
+async function findPedidosPagosSinEntrega(req: Request, res: Response) {
+  try {
+    const pedidosConPagoySinEntrega = await em.find(Pedido, { pago: { $ne: null }, entrega: null });
+    res.status(200).json({ message: 'Se encontraron los pedidos con pago pero sin entrega!', data: pedidosConPagoySinEntrega });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
+
 async function findOne(req: Request, res: Response) {
   try {
     const nroPedido = Number.parseInt(req.params.nroPedido)
@@ -135,5 +145,6 @@ export {
   add,
   update,
   remove,
-  findPedidosSinPago
+  findPedidosSinPago,
+  findPedidosPagosSinEntrega
 }

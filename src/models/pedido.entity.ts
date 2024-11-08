@@ -21,25 +21,10 @@ export class Pedido {
     @ManyToOne({ entity: () => Entrega, nullable: true })
     entrega!: Rel<Entrega>;
 
-    @OneToOne(() => Pago, {nullable: true, eager: true })
+    @OneToOne(() => Pago, { nullable: true, eager: true })
     pago!: Rel<Pago>;
 
     @OneToMany(() => LineaDeProducto, lineaDeProducto => lineaDeProducto.pedido, { mappedBy: lineaDeProducto => lineaDeProducto.pedido, cascade: [Cascade.ALL] })
     lineas = new Collection<LineaDeProducto>(this);
 
-    /* constructor(
-        fecha: Date,
-        total: number,
-        cliente: Ref<Cliente>,
-        entrega: Entrega,
-        pago: Pago,
-        lineas: Collection<LineaDeProducto>,
-    ) {
-        this.fecha = fecha;
-        this.total = total;
-        this.cliente = cliente;
-        this.entrega = entrega;
-        this.pago = pago;
-        this.lineas = lineas
-    } */
 }
