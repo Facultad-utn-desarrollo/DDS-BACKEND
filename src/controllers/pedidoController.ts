@@ -100,6 +100,48 @@ async function update(req: Request, res: Response) {
   }
 }
 
+async function findAllPedidosByFilters(req: Request, res: Response) {
+  try {
+    const clienteId = req.query.clienteId ? Number(req.query.clienteId) : null;
+    const fechaInicio = req.query.fechaInicio ? new Date(req.query.fechaInicio as string) : null;
+    const fechaFin = req.query.fechaFin ? new Date(req.query.fechaFin as string) : null;
+
+    // Construir el filtro para la búsqueda
+    const filter: any = {};
+
+    // Verifica si el clienteId es un número válido antes de usarlo en el filtro
+    if (clienteId && !isNaN(clienteId)) {
+      filter.cliente = clienteId;
+    }
+
+    // Verifica si las fechas son válidas antes de aplicarlas
+    if (fechaInicio && !isNaN(fechaInicio.getTime())) {
+      filter.fecha = filter.fecha || {};
+      filter.fecha.$gte = fechaInicio;
+    }
+
+    if (fechaFin && !isNaN(fechaFin.getTime())) {
+      filter.fecha = filter.fecha || {};
+      filter.fecha.$lte = fechaFin;
+    }
+    delete filter.nroPedido;
+
+    console.log('mostrando los')
+    console.log(filter)
+    // Obtener los pedidos filtrados
+    const pedidos = await em.find(Pedido, filter, {
+      populate: ['cliente', 'entrega', 'pago', 'lineas'],
+    });
+
+    // Responder con los pedidos encontrados
+    res.status(200).json({ pedidos });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
+
+
 async function remove(req: Request, res: Response) {
   try {
     const nroPedido = Number.parseInt(req.params.nroPedido);
@@ -146,5 +188,6 @@ export {
   update,
   remove,
   findPedidosSinPago,
-  findPedidosPagosSinEntrega
+  findPedidosPagosSinEntrega,
+  findAllPedidosByFilters
 }
