@@ -27,6 +27,18 @@ async function findOne(req: Request, res: Response) {
   }
 }
 
+async function findTiposDeProductoActivos(req: Request, res: Response) {
+  try {
+    const tiposProducto = await em.find(TipoProducto, { disponible: true });
+    res.status(200).json({
+      message: 'Se encontraron los tipo producto activos!',
+      data: tiposProducto,
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
 async function add(req: Request, res: Response) {
   try {
     const id = Number.parseInt(req.params.id)
@@ -68,4 +80,4 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-export { findAll, findOne, add, update, remove }
+export { findAll, findOne, add, update, remove, findTiposDeProductoActivos }

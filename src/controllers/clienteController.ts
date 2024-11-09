@@ -27,10 +27,22 @@ async function findOne(req: Request, res: Response) {
   }
 }
 
+async function findClientesActivos(req: Request, res: Response) {
+  try {
+    const clientes = await em.find(Cliente, { disponible: true });
+    res.status(200).json({
+      message: 'Se encontraron los clientes activos!',
+      data: clientes,
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
 async function add(req: Request, res: Response) {
   try {
     const cliente = em.create(Cliente, req.body)
-    cliente.disponible= true;
+    cliente.disponible = true;
     await em.flush()
     res.status(201).json({ message: 'Cliente creado!', data: cliente })
   } catch (error: any) {
@@ -55,11 +67,11 @@ async function remove(req: Request, res: Response) {
   try {
     const id = Number.parseInt(req.params.id)
     const cliente = await em.getReference(Cliente, id)
-    
+
     const clienteNoDisponible = cliente
     clienteNoDisponible.disponible = false;
 
-    em.assign(cliente,clienteNoDisponible)
+    em.assign(cliente, clienteNoDisponible)
 
     await em.flush()
     res.status(200).json({ message: 'cliente dado de baja!' })
@@ -68,4 +80,4 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-export { findAll, findOne, add, update, remove }
+export { findAll, findOne, add, update, remove, findClientesActivos }

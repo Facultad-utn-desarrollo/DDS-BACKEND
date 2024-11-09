@@ -27,6 +27,19 @@ async function findOne(req: Request, res: Response) {
   }
 }
 
+async function findRepartidoresActivos(req: Request, res: Response) {
+  try {
+    const repartidores = await em.find(Repartidor, { disponible: true });
+    res.status(200).json({
+      message: 'Se encontraron los repartidores activos!',
+      data: repartidores,
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
+
 async function add(req: Request, res: Response) {
   try {
     const repartidor = em.create(Repartidor, req.body)
@@ -68,4 +81,4 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-export { findAll, findOne, add, update, remove }
+export { findAll, findOne, add, update, remove, findRepartidoresActivos }

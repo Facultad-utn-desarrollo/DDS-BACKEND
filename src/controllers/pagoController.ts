@@ -94,28 +94,33 @@ async function findOne(req: Request, res: Response) {
 async function update(req: Request, res: Response) {
   try {
     const id = Number.parseInt(req.params.id);
+    const { pedidoId, tipoPagoId } = req.body;
 
-    // 1. Buscar el pago que queremos actualizar
-    const pagoToUpdate = await em.findOneOrFail(Pago, { id });
+    // 1. Encontrar el pago existente y cargar sus relaciones
+    const pagoToUpdate = await em.findOneOrFail(Pago, { id }, { populate: ['pedido', 'tipoPago'] });
 
-    // 2. Asignar los nuevos valores al pago
-    em.assign(pagoToUpdate, req.body);
-
-    // 3. Si el cuerpo de la solicitud contiene un 'pedidoId', asociamos el pago al pedido
-    if (req.body.pedidoId) {
-      // Buscamos el pedido asociado al pago
-      const pedido = await em.findOneOrFail(Pedido, { nroPedido: req.body.pedidoId });
-
-      // Asociamos el pago al pedido
-      pagoToUpdate.pedido = pedido;
+    // 2. Actualizar el tipoPago (si cambia)
+    if (tipoPagoId && tipoPagoId !== pagoToUpdate.tipoPago.id) {
+      const tipoPagoToUpdate = await em.findOneOrFail(TipoPago, { id: tipoPagoId });
+      pagoToUpdate.tipoPago = tipoPagoToUpdate; // Asignar nuevo tipo de pago
     }
 
-    // 4. Persistir los cambios en la base de datos
+    // 3. Actualizar el pedido (si cambia)
+    if (pedidoId && pedidoId !== pagoToUpdate.pedido.nroPedido) {
+      const pedidoToUpdate = await em.findOneOrFail(Pedido, { nroPedido: pedidoId });
+      pagoToUpdate.pedido = pedidoToUpdate; // Asignar nuevo pedido
+    }
+
+    // 4. Asignar los valores restantes del cuerpo de la solicitud al pago
+    em.assign(pagoToUpdate, req.body);
+
+    // 5. Guardar los cambios en la base de datos
     await em.flush();
 
-    // 5. Devolver la respuesta
+    // 6. Responder con el resultado
     res.status(200).json({ message: 'Pago actualizado!', data: pagoToUpdate });
   } catch (error: any) {
+    // Error al procesar la solicitud
     res.status(500).json({ message: error.message });
   }
 }
