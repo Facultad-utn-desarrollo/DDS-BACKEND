@@ -50,6 +50,7 @@ async function add(req: Request, res: Response) {
         apellidoNombre: repartidor.apellidoNombre,
         vehiculo: repartidor.vehiculo,
         zona: repartidor.zona,
+        disponible: repartidor.disponible,
       });
     }
 

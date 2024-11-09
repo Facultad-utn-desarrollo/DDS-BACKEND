@@ -30,6 +30,7 @@ async function findOne(req: Request, res: Response) {
 async function add(req: Request, res: Response) {
   try {
     const repartidor = em.create(Repartidor, req.body)
+    repartidor.disponible = true;
     await em.flush()
     res.status(201).json({ message: 'Repartidor creado!', data: repartidor })
   } catch (error: any) {
@@ -53,7 +54,14 @@ async function remove(req: Request, res: Response) {
   try {
     const id = Number.parseInt(req.params.id)
     const repartidor = await em.getReference(Repartidor, id)
-    await em.removeAndFlush(repartidor)
+
+    const repartidorNoDisponible = repartidor
+    repartidorNoDisponible.disponible = false;
+
+    em.assign(repartidor, repartidorNoDisponible)
+
+    await em.flush()
+
     res.status(200).json({ message: 'Repartidor borrado!' })
   } catch (error: any) {
     res.status(500).json({ message: error.message })

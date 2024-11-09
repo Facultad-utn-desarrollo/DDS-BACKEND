@@ -30,6 +30,7 @@ async function findOne(req: Request, res: Response) {
 async function add(req: Request, res: Response) {
   try {
     const tipoPago = em.create(TipoPago, req.body)
+    tipoPago.disponible = true;
     await em.flush()
     res.status(201).json({ message: 'tipo de Pago creado!', data: tipoPago })
   } catch (error: any) {
@@ -53,7 +54,14 @@ async function remove(req: Request, res: Response) {
   try {
     const id = Number.parseInt(req.params.id)
     const tipoPago = await em.getReference(TipoPago, id)
-    await em.removeAndFlush(tipoPago)
+
+    const tipoPagoNoDisponible = tipoPago
+    tipoPagoNoDisponible.disponible = false;
+
+    em.assign(tipoPago, tipoPagoNoDisponible)
+
+    await em.flush()
+
     res.status(200).json({ message: 'tipo de Pago borrado!' })
   } catch (error: any) {
     res.status(500).json({ message: error.message })

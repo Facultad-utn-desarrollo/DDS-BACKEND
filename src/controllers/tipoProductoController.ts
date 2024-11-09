@@ -29,8 +29,16 @@ async function findOne(req: Request, res: Response) {
 
 async function add(req: Request, res: Response) {
   try {
-    const tipoProducto = em.create(TipoProducto, req.body)
+    const id = Number.parseInt(req.params.id)
+    const tipoProducto = await em.getReference(TipoProducto, id)
+
+    const tipoProductoNoDisponible = tipoProducto
+    tipoProductoNoDisponible.disponible = false;
+
+    em.assign(tipoProducto, tipoProductoNoDisponible)
+
     await em.flush()
+
     res.status(201).json({ message: 'Tipo de producto creado!', data: tipoProducto })
   } catch (error: any) {
     res.status(500).json({ message: error.message })

@@ -15,6 +15,9 @@ export class Repartidor {
     @Property()
     zona!: String;
 
+    @Property()
+    disponible: boolean = true;
+
     @OneToMany(() => Entrega, (entrega) => entrega.repartidor, { cascade: [Cascade.ALL], })
     entregas = new Collection<Entrega>(this)
 

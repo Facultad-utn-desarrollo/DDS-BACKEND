@@ -8,6 +8,9 @@ export class TipoProducto {
     @Property()
     nombre!: string;
 
+    @Property()
+    disponible: boolean = true;
+
     @OneToMany(() => Producto, (producto) => producto.tipoProducto, { cascade: [Cascade.ALL], })
     productos = new Collection<Producto>(this)
 

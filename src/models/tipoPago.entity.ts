@@ -11,6 +11,9 @@ export class TipoPago {
   @Property()
   descripcion!: string;
 
+  @Property()
+  disponible: boolean = true;
+
   @OneToMany(() => Pago, (pago) => pago.tipoPago, { cascade: [Cascade.ALL], })
   pagos = new Collection<Pago>(this)
 

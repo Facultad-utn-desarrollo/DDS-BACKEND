@@ -9,7 +9,7 @@ const em = orm.em;
 
 async function findAll(req: Request, res: Response) {
   try {
-    const pagos = await em.find(Pago, {}, {populate: ['pedido', 'tipoPago']});
+    const pagos = await em.find(Pago, {}, { populate: ['pedido', 'tipoPago'] });
     res.status(200).json({ pagos });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
@@ -27,7 +27,7 @@ async function add(req: Request, res: Response) {
     if (pagoData.fecha == "" || pagoData.fecha == null) {
       pagoData.fecha = new Date();
     }
-    if(pagoData.id == 0){pagoData.id = null}
+    if (pagoData.id == 0) { pagoData.id = null }
 
     // Obtener o crear el TipoPago
     if (tipoPago?.id) {
@@ -39,6 +39,7 @@ async function add(req: Request, res: Response) {
       tipoPagoEntity = em.create(TipoPago, {
         nombre: tipoPago.nombre,
         descripcion: tipoPago.descripcion,
+        disponible: tipoPago.disponible
       });
     }
 
