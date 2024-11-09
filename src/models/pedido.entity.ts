@@ -24,7 +24,10 @@ export class Pedido {
     @OneToOne(() => Pago, { nullable: true, eager: true })
     pago!: Rel<Pago>;
 
-    @OneToMany(() => LineaDeProducto, lineaDeProducto => lineaDeProducto.pedido, { mappedBy: lineaDeProducto => lineaDeProducto.pedido, cascade: [Cascade.ALL] })
-    lineas = new Collection<LineaDeProducto>(this);
-
+    @OneToMany(() => LineaDeProducto, lineaDeProducto => lineaDeProducto.pedido, {
+        mappedBy: lineaDeProducto => lineaDeProducto.pedido,
+        cascade: [Cascade.ALL],
+        orphanRemoval: true, // Esto asegura que se eliminen las lineas que ya no estén en la colección.
+      })
+      lineas = new Collection<LineaDeProducto>(this);
 }

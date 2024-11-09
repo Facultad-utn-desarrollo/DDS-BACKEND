@@ -85,20 +85,63 @@ async function add(req: Request, res: Response) {
   }
 }
 
-
-
-
 async function update(req: Request, res: Response) {
   try {
-    const nroPedido = Number.parseInt(req.params.nroPedido)
-    const pedidoToUpdate = await em.findOneOrFail(Pedido, { nroPedido })
-    em.assign(pedidoToUpdate, req.body)
-    await em.flush()
-    res.status(200).json({ message: 'Pedido actualizado!', data: pedidoToUpdate })
+    const nroPedido = Number.parseInt(req.params.nroPedido);
+
+    // Buscar el pedido a actualizar
+    const pedidoToUpdate = await em.findOneOrFail(Pedido, { nroPedido }, { populate: ['lineas'] });
+
+    // Asignar los campos del pedido (cliente, pago, total, etc.)
+    em.assign(pedidoToUpdate, req.body);
+
+    // Si el cuerpo contiene lineas, actualizamos o agregamos las lineas
+    if (req.body.lineas && req.body.lineas.length > 0) {
+      // Primero, eliminamos las lineas que no están en el body
+      for (const linea of pedidoToUpdate.lineas.getItems()) {
+        const found = req.body.lineas.find((updatedLinea: any) => updatedLinea.id === linea.id);
+        if (!found) {
+          // Si no existe la línea en el body, eliminamos esa linea
+          pedidoToUpdate.lineas.remove(linea);
+        }
+      }
+
+      // Ahora procesamos las lineas del pedido
+      for (const updatedLinea of req.body.lineas) {
+        if (updatedLinea.id) {
+          // Si tiene id, buscamos esa linea para actualizarla
+          const existingLinea = pedidoToUpdate.lineas.getItems().find((linea) => linea.id === updatedLinea.id);
+          if (existingLinea) {
+            // Actualizamos los valores de la linea existente
+            existingLinea.cantidad = updatedLinea.cantidad;
+            existingLinea.subtotal = updatedLinea.subtotal;
+          } else {
+            // Si la linea no se encuentra, insertamos como nueva
+            const newLinea = em.create(LineaDeProducto, updatedLinea);
+            pedidoToUpdate.lineas.add(newLinea);
+          }
+        } else {
+          // Si no tiene id, es una nueva línea de producto
+          const newLinea = em.create(LineaDeProducto, updatedLinea);
+          pedidoToUpdate.lineas.add(newLinea);
+        }
+      }
+    }
+    console.log('actualizando pedido')
+    // Guardar los cambios
+    await em.flush();
+    
+    // Devolver la respuesta
+    res.status(200).json({ message: 'Pedido actualizado!', data: pedidoToUpdate });
+
   } catch (error: any) {
-    res.status(500).json({ message: error.message })
+    res.status(500).json({ message: error.message });
   }
 }
+
+
+
+
 
 async function findAllPedidosByFilters(req: Request, res: Response) {
   try {
