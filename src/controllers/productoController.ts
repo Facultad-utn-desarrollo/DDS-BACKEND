@@ -16,6 +16,54 @@ async function findAll(req: Request, res: Response) {
   }
 }
 
+async function findAllByFilters(req: Request, res: Response) {
+  try {
+    // Obtener los parámetros de búsqueda desde la URL (query parameters)
+    const descripcionFilter = req.query.descripcion ? String(req.query.descripcion) : '';
+    const tipoProductoFilter = req.query.tipoProducto ? Number(req.query.tipoProducto) : null;
+    const precioMinimo = req.query.precioMinimo ? Number(req.query.precioMinimo) : null;
+    const precioMaximo = req.query.precioMaximo ? Number(req.query.precioMaximo) : null;
+
+    // Construir el filtro para la búsqueda
+    const filter: any = {};
+
+    // Filtrar por descripcion (si se proporciona)
+    if (descripcionFilter) {
+      filter.descripcion = { $like: `%${descripcionFilter}%` }; // Filtra por coincidencia parcial en descripcion
+    }
+
+    // Filtrar por tipoProducto (si se proporciona)
+    if (tipoProductoFilter) {
+      filter.tipoProducto = tipoProductoFilter; // Filtra por el código del tipoProducto
+    }
+
+    // Filtrar por precio (si se proporciona)
+    if (precioMinimo || precioMaximo) {
+      filter.precio = {};
+      
+      if (precioMinimo) {
+        filter.precio.$gte = precioMinimo; // Filtra los productos con precio mayor o igual al precio mínimo
+      }
+      
+      if (precioMaximo) {
+        filter.precio.$lte = precioMaximo; // Filtra los productos con precio menor o igual al precio máximo
+      }
+    }
+
+    // Obtener los productos filtrados
+    const productos = await em.find(Producto, filter, {
+      populate: ['tipoProducto'], // Poblar la relación 'tipoProducto'
+    });
+
+    // Responder con los productos encontrados
+    res.status(200).json({ productos });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
+
+
 
 async function findOne(req: Request, res: Response) {
   try {
@@ -90,5 +138,6 @@ export {
   , findOne,
   add,
   update,
-  remove
+  remove,
+  findAllByFilters
 }
