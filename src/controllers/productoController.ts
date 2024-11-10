@@ -10,52 +10,59 @@ async function findAll(req: Request, res: Response) {
     const productos = await em.find(Producto, {}, { populate: ['tipoProducto'] })
     res
       .status(200)
-      .json({productos: productos })
+      .json({ productos: productos })
   } catch (error: any) {
     res.status(500).json({ message: error.message })
   }
 }
 
+async function findProductosActivos(req: Request, res: Response) {
+  try {
+    const productos = await em.find(Producto, { disponible: true });
+    res.status(200).json({
+      message: 'Se encontraron los productos activos!',
+      data: productos,
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
 async function findAllByFilters(req: Request, res: Response) {
   try {
-    // Obtener los parámetros de búsqueda desde la URL (query parameters)
+
     const descripcionFilter = req.query.descripcion ? String(req.query.descripcion) : '';
     const tipoProductoFilter = req.query.tipoProducto ? Number(req.query.tipoProducto) : null;
     const precioMinimo = req.query.precioMinimo ? Number(req.query.precioMinimo) : null;
     const precioMaximo = req.query.precioMaximo ? Number(req.query.precioMaximo) : null;
 
-    // Construir el filtro para la búsqueda
+
     const filter: any = {};
 
-    // Filtrar por descripcion (si se proporciona)
     if (descripcionFilter) {
-      filter.descripcion = { $like: `%${descripcionFilter}%` }; // Filtra por coincidencia parcial en descripcion
+      filter.descripcion = { $like: `%${descripcionFilter}%` };
     }
 
-    // Filtrar por tipoProducto (si se proporciona)
     if (tipoProductoFilter) {
-      filter.tipoProducto = tipoProductoFilter; // Filtra por el código del tipoProducto
+      filter.tipoProducto = tipoProductoFilter;
     }
 
-    // Filtrar por precio (si se proporciona)
     if (precioMinimo || precioMaximo) {
       filter.precio = {};
-      
+
       if (precioMinimo) {
-        filter.precio.$gte = precioMinimo; // Filtra los productos con precio mayor o igual al precio mínimo
+        filter.precio.$gte = precioMinimo;
       }
-      
+
       if (precioMaximo) {
-        filter.precio.$lte = precioMaximo; // Filtra los productos con precio menor o igual al precio máximo
+        filter.precio.$lte = precioMaximo;
       }
     }
 
-    // Obtener los productos filtrados
     const productos = await em.find(Producto, filter, {
-      populate: ['tipoProducto'], // Poblar la relación 'tipoProducto'
+      populate: ['tipoProducto'],
     });
 
-    // Responder con los productos encontrados
     res.status(200).json({ productos });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
@@ -83,27 +90,19 @@ async function add(req: Request, res: Response) {
     const { tipoProducto, ...productoData } = req.body;
 
     let tipoProductoEntity;
-    
-    // Si el tipoProducto tiene un ID, buscarlo en la base de datos
+
     if (tipoProducto?.id) {
       tipoProductoEntity = await em.findOne(TipoProducto, tipoProducto.id);
-      
-      // Si no se encuentra el tipoProducto, lanza un error
+
       if (!tipoProductoEntity) {
         return res.status(404).json({ message: 'TipoProducto no encontrado' });
       }
-    } else {
-      // Si no hay ID, crear uno nuevo con los datos proporcionados
-      tipoProductoEntity = em.create(TipoProducto, tipoProducto);
     }
 
-    // Crear el Producto con el tipoProducto existente o recién creado
     let producto = em.create(Producto, { ...productoData, tipoProducto: tipoProductoEntity });
 
-    // Guardar los cambios
     await em.persistAndFlush(producto);
-    
-    // Responder con el producto creado
+
     res.status(201).json({ message: 'Producto creado!', data: producto });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
@@ -124,9 +123,13 @@ async function update(req: Request, res: Response) {
 
 async function remove(req: Request, res: Response) {
   try {
+
     const codigo = Number.parseInt(req.params.codigo)
-    const producto = await em.findOneOrFail(Producto, { codigo })
-    await em.removeAndFlush(producto)
+    const producto = await em.findOneOrFail(Producto, { codigo });
+
+    producto.disponible = false;
+    await em.flush();
+
     res.status(200).json({ message: 'Producto borrado!' })
   } catch (error: any) {
     res.status(500).json({ message: error.message })
@@ -139,5 +142,6 @@ export {
   add,
   update,
   remove,
-  findAllByFilters
+  findAllByFilters,
+  findProductosActivos
 }

@@ -14,9 +14,4 @@ export class TipoProducto {
     @OneToMany(() => Producto, (producto) => producto.tipoProducto, { cascade: [Cascade.ALL], })
     productos = new Collection<Producto>(this)
 
-    /*constructor(
-        nombre: string,
-    ) {
-        this.nombre = nombre;
-    }*/
 }

@@ -16,11 +16,5 @@ export class Pago {
     @OneToOne(() => Pedido, { nullable: false, cascade: [Cascade.PERSIST, Cascade.MERGE] })
     pedido!: Rel<Pedido>;
 
-    /*constructor(
-        fecha: Date,
-        tipoPago: TipoPago
-    ) {
-        this.fecha = fecha;
-        this.tipoPago = tipoPago;
-    }*/
+
 }

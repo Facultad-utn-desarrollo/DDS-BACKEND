@@ -12,25 +12,18 @@ export class Producto {
     stock!: number;
     @Property()
     precio!: number;
-    @ManyToOne({ 
-            entity: () => TipoProducto, 
-            nullable: false , 
-            cascade: [Cascade.MERGE], 
-            })
+    @ManyToOne({
+        entity: () => TipoProducto,
+        nullable: false,
+        cascade: [Cascade.MERGE],
+    })
     tipoProducto!: Rel<TipoProducto>;
+
+    @Property()
+    disponible: boolean = true;
 
     @OneToMany(() => LineaDeProducto, (lineaDeProducto) => lineaDeProducto.producto, { cascade: [Cascade.ALL], })
     lineas = new Collection<LineaDeProducto>(this)
 
-    /*constructor(
-        descripcion: string,
-        precio: number,
-        stock: number,
-        tipoProducto: TipoProducto
-    ) {
-        this.descripcion = descripcion;
-        this.stock = stock;
-        this.precio = precio;
-        this.tipoProducto = tipoProducto;
-    }*/
+
 }

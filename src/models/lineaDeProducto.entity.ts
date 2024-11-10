@@ -19,13 +19,4 @@ export class LineaDeProducto {
     @Property()
     subtotal!: number;
 
-    /*constructor(
-        producto: Producto,
-        cantidad: number,
-        subtotal: number,
-    ) {
-        this.cantidad = cantidad;
-        this.subtotal = subtotal;
-        this.producto = producto;
-    }*/
 }

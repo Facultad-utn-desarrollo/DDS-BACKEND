@@ -40,7 +40,7 @@ app.use((_, res) => {
   return res.status(404).send({ message: 'No se encontro la ruta' })
 })
 
-//await syncSchema() //Se descomenta sol cuando hay que updatear algo del modelo. Se agregan columnas a una entity, se cambia el tipo de dato, etc
+//await syncSchema() //no lo borren, con esto actualizamos el schema si hace falta
 
 app.listen(3000, () => {
   console.log("Server corriendo en la ruta http://localhost:3000/")

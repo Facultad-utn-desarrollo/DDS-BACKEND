@@ -6,28 +6,28 @@ import { Cascade, Collection, Entity, ManyToOne, OneToMany, PrimaryKey, Property
 
 @Entity()
 export class Pedido {
-    @PrimaryKey()
-    nroPedido?: number
+  @PrimaryKey()
+  nroPedido?: number
 
-    @Property()
-    fecha!: Date;
+  @Property()
+  fecha!: Date;
 
-    @Property()
-    total!: number;
+  @Property()
+  total!: number;
 
-    @ManyToOne(() => Cliente, { nullable: false })
-    cliente!: Ref<Cliente>;
+  @ManyToOne(() => Cliente, { nullable: false })
+  cliente!: Ref<Cliente>;
 
-    @ManyToOne({ entity: () => Entrega, nullable: true })
-    entrega!: Rel<Entrega>;
+  @ManyToOne({ entity: () => Entrega, nullable: true })
+  entrega!: Rel<Entrega>;
 
-    @OneToOne(() => Pago, { nullable: true, eager: true })
-    pago!: Rel<Pago>;
+  @OneToOne(() => Pago, { nullable: true, eager: true })
+  pago!: Rel<Pago>;
 
-    @OneToMany(() => LineaDeProducto, lineaDeProducto => lineaDeProducto.pedido, {
-        mappedBy: lineaDeProducto => lineaDeProducto.pedido,
-        cascade: [Cascade.ALL],
-        orphanRemoval: true, // Esto asegura que se eliminen las lineas que ya no estén en la colección.
-      })
-      lineas = new Collection<LineaDeProducto>(this);
+  @OneToMany(() => LineaDeProducto, lineaDeProducto => lineaDeProducto.pedido, {
+    mappedBy: lineaDeProducto => lineaDeProducto.pedido,
+    cascade: [Cascade.ALL],
+    orphanRemoval: true,
+  })
+  lineas = new Collection<LineaDeProducto>(this);
 }

@@ -71,9 +71,18 @@ async function update(req: Request, res: Response) {
 
 async function remove(req: Request, res: Response) {
   try {
+
     const id = Number.parseInt(req.params.id)
+
     const tipoProducto = await em.getReference(TipoProducto, id)
-    await em.removeAndFlush(tipoProducto)
+
+    const tipoProductoNoDisponible = tipoProducto
+    tipoProductoNoDisponible.disponible = false;
+
+    em.assign(tipoProducto, tipoProductoNoDisponible)
+
+    await em.flush()
+
     res.status(200).json({ message: 'Tipo de Producto borrado!' })
   } catch (error: any) {
     res.status(500).json({ message: error.message })
