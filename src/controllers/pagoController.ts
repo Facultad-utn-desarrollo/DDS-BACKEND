@@ -33,22 +33,12 @@ async function add(req: Request, res: Response) {
       if (!tipoPagoEntity) {
         return res.status(404).json({ message: 'Tipo de Pago no encontrado' });
       }
-    } else {
-      tipoPagoEntity = em.create(TipoPago, {
-        nombre: tipoPago.nombre,
-        descripcion: tipoPago.descripcion,
-        disponible: tipoPago.disponible
-      });
     }
 
     if (pedido?.nroPedido) {
       pedidoEntity = await em.findOne(Pedido, pedido.nroPedido);
       if (!pedidoEntity) {
         return res.status(404).json({ message: 'Pedido no encontrado' });
-      }
-
-      if (pedidoEntity.pago) {
-        return res.status(400).json({ message: 'El pedido ya tiene un pago asociado' });
       }
     }
 
@@ -85,21 +75,11 @@ async function findOne(req: Request, res: Response) {
 async function update(req: Request, res: Response) {
   try {
     const id = Number.parseInt(req.params.id);
-    const { pedidoId, tipoPagoId } = req.body;
 
     const pagoToUpdate = await em.findOneOrFail(Pago, { id }, { populate: ['pedido', 'tipoPago'] });
 
-    if (tipoPagoId && tipoPagoId !== pagoToUpdate.tipoPago.id) {
-      const tipoPagoToUpdate = await em.findOneOrFail(TipoPago, { id: tipoPagoId });
-      pagoToUpdate.tipoPago = tipoPagoToUpdate;
-    }
-
-    if (pedidoId && pedidoId !== pagoToUpdate.pedido.nroPedido) {
-      const pedidoToUpdate = await em.findOneOrFail(Pedido, { nroPedido: pedidoId });
-      pagoToUpdate.pedido = pedidoToUpdate;
-    }
-
-    em.assign(pagoToUpdate, req.body);
+    // `em.assign` ya realiza la asignación de propiedades, incluido `tipoPagoId` y `pedidoId`
+    em.assign(pagoToUpdate, req.body, { mergeObjects: true });
 
     await em.flush();
 

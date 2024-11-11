@@ -88,39 +88,28 @@ async function update(req: Request, res: Response) {
     const id = Number.parseInt(req.params.id);
     const { repartidor, pedidos } = req.body;
 
-    // Encontrar la entrega existente y cargar sus relaciones
     const entregaToUpdate = await em.findOneOrFail(Entrega, { id }, { populate: ['repartidor', 'pedidos'] });
 
-    // Actualizar el repartidor (si cambia)
     if (repartidor && repartidor.id !== entregaToUpdate.repartidor.id) {
       const repartidorToUpdate = await em.findOneOrFail(Repartidor, { id: repartidor.id });
-      entregaToUpdate.repartidor = repartidorToUpdate; // Asignar nuevo repartidor
+      entregaToUpdate.repartidor = repartidorToUpdate;
     }
 
-    // Eliminar todos los pedidos de la entrega
-    // Usar un ciclo para pasar cada pedido de forma individual al método remove
-    for (const pedido of entregaToUpdate.pedidos) {
-      entregaToUpdate.pedidos.remove(pedido); // Eliminar cada pedido de la entrega
-    }
-
-    // Agregar los nuevos pedidos (según el nroPedido recibido)
+    entregaToUpdate.pedidos.removeAll();
     for (const pedido of pedidos) {
       const pedidoToAdd = await em.findOneOrFail(Pedido, { nroPedido: pedido.nroPedido });
-      entregaToUpdate.pedidos.add(pedidoToAdd); // Agregar el pedido a la entrega
+      entregaToUpdate.pedidos.add(pedidoToAdd);
     }
 
-    // Asignar los valores restantes del cuerpo de la solicitud a la entrega
-    em.assign(entregaToUpdate, req.body);
-
-    // Guardar los cambios en la base de datos
     await em.flush();
 
-    // Responder con el resultado
     res.status(200).json({ message: 'Entrega actualizada!', data: entregaToUpdate });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
 }
+
+
 
 
 
