@@ -132,15 +132,12 @@ async function findAllPedidosByFilters(req: Request, res: Response) {
     const fechaInicio = req.query.fechaInicio ? new Date(req.query.fechaInicio as string) : null;
     const fechaFin = req.query.fechaFin ? new Date(req.query.fechaFin as string) : null;
 
-    // Construir el filtro para la búsqueda
     const filter: any = {};
 
-    // Verifica si el clienteId es un número válido antes de usarlo en el filtro
     if (clienteId && !isNaN(clienteId)) {
       filter.cliente = clienteId;
     }
 
-    // Verifica si las fechas son válidas antes de aplicarlas
     if (fechaInicio && !isNaN(fechaInicio.getTime())) {
       filter.fecha = filter.fecha || {};
       filter.fecha.$gte = fechaInicio;
@@ -152,9 +149,7 @@ async function findAllPedidosByFilters(req: Request, res: Response) {
     }
     delete filter.nroPedido;
 
-    console.log('mostrando los')
-    console.log(filter)
-    // Obtener los pedidos filtrados
+    
     const pedidos = await em.find(Pedido, filter, {
       populate: ['cliente', 'entrega', 'pago', 'lineas'],
     });
@@ -172,29 +167,23 @@ async function remove(req: Request, res: Response) {
   try {
     const nroPedido = Number.parseInt(req.params.nroPedido);
 
-    // Buscamos el pedido en la base de datos y aseguramos que la colección 'lineas' esté cargada
     const pedido = await em.findOneOrFail(Pedido, { nroPedido }, { populate: ['lineas'] });
 
-    // Si el pedido tiene un pago, lo eliminamos primero
     if (pedido.pago) {
       await em.removeAndFlush(pedido.pago);
     }
 
-    // Si el pedido tiene una entrega asociada
     if (pedido.entrega) {
       const entrega = await em.findOneOrFail(Entrega, { id: pedido.entrega.id });
 
-      // Eliminar el pedido de la lista de pedidos en la entrega
       entrega.pedidos.remove(pedido);
-      await em.flush();  // Guardamos los cambios en la entrega (ya no tiene ese pedido)
+      await em.flush(); 
     }
 
-    // Eliminar las líneas de productos asociadas al pedido
     if (pedido.lineas && pedido.lineas.isInitialized()) {
       await em.removeAndFlush(pedido.lineas.getItems());
     }
 
-    // Finalmente, eliminamos el pedido
     await em.removeAndFlush(pedido);
 
     // Enviamos la respuesta de éxito
