@@ -29,7 +29,7 @@ async function findPedidosSinPago(req: Request, res: Response) {
 
 async function findPedidosPagosSinEntrega(req: Request, res: Response) {
   try {
-    const pedidosConPagoySinEntrega = await em.find(Pedido, { pago: { $ne: null } }, { populate: ['entrega'] });
+    const pedidosConPagoySinEntrega = await em.find(Pedido, { pago: { $ne: null }, entrega: null }, { populate: ['entrega'] });
     res.status(200).json({ message: 'Se encontraron los pedidos con pago pero sin entrega!', data: pedidosConPagoySinEntrega });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
@@ -149,7 +149,7 @@ async function findAllPedidosByFilters(req: Request, res: Response) {
     }
     delete filter.nroPedido;
 
-    
+
     const pedidos = await em.find(Pedido, filter, {
       populate: ['cliente', 'entrega', 'pago', 'lineas'],
     });
@@ -177,7 +177,7 @@ async function remove(req: Request, res: Response) {
       const entrega = await em.findOneOrFail(Entrega, { id: pedido.entrega.id });
 
       entrega.pedidos.remove(pedido);
-      await em.flush(); 
+      await em.flush();
     }
 
     if (pedido.lineas && pedido.lineas.isInitialized()) {
