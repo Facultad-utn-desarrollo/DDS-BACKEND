@@ -5,7 +5,7 @@ export const productoRouter = Router()
 
 productoRouter.get('/', findAll)
 productoRouter.get('/filter', findAllByFilters)
-productoRouter.get('/activos/', findProductosActivos)
+productoRouter.get('/activos', findProductosActivos)
 productoRouter.get('/:codigo', findOne)
 productoRouter.post('/', add)
 productoRouter.put('/:codigo', update)
