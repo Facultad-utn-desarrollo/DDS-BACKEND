@@ -3,6 +3,7 @@ import { Entrega } from "./entrega.entity.js";
 import { Pago } from "./pago.entity.js";
 import { LineaDeProducto } from "./lineaDeProducto.entity.js";
 import { Cascade, Collection, Entity, ManyToOne, OneToMany, PrimaryKey, Property, Ref, Rel, OneToOne } from "@mikro-orm/core";
+import { User } from "./user.entity.js";
 
 @Entity()
 export class Pedido {
@@ -30,4 +31,7 @@ export class Pedido {
     orphanRemoval: true,
   })
   lineas = new Collection<LineaDeProducto>(this);
+  
+  @ManyToOne({ entity: () => User, nullable: true,cascade: [Cascade.MERGE] })
+  user!: Rel<User>; // Relación con el User, un Pedido siempre debe pertenecer a un User
 }

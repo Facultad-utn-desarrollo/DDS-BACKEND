@@ -12,7 +12,14 @@ import { pagoRouter } from './routes/pagoRoutes.js'
 import { productoRouter } from './routes/productoRoutes.js'
 import { pedidoRouter } from './routes/pedidoRoutes.js'
 import { lineasRouter } from './routes/lineaProductoRoutes.js'
+import { authRouter } from './routes/authRoutes.js'
+import dotenv from "dotenv";
 
+// Cargar las variables de entorno del archivo .env
+dotenv.config();
+
+console.log("JWT_SECRET:", process.env.JWT_SECRET);
+console.log("JWT_EXPIRATION:", process.env.JWT_EXPIRATION);
 
 const app = express()
 app.use(express.json())
@@ -35,6 +42,7 @@ app.use('/api/v2/pago', pagoRouter)
 app.use('/api/v2/producto', productoRouter)
 app.use('/api/v2/pedido', pedidoRouter)
 app.use('/api/v2/lineasDeProducto', lineasRouter)
+app.use('/api/v2/login',authRouter)
 
 app.use((_, res) => {
   return res.status(404).send({ message: 'No se encontro la ruta' })
