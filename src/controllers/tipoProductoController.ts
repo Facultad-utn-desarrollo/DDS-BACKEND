@@ -41,13 +41,8 @@ async function findTiposDeProductoActivos(req: Request, res: Response) {
 
 async function add(req: Request, res: Response) {
   try {
-    const id = Number.parseInt(req.params.id)
-    const tipoProducto = await em.getReference(TipoProducto, id)
-
-    const tipoProductoNoDisponible = tipoProducto
-    tipoProductoNoDisponible.disponible = false;
-
-    em.assign(tipoProducto, tipoProductoNoDisponible)
+    const tipoProducto = em.create(TipoProducto, req.body)
+    tipoProducto.disponible = true;
 
     await em.flush()
 
