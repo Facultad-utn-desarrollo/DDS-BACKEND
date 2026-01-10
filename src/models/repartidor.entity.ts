@@ -1,5 +1,6 @@
-import { Entity, PrimaryKey, Property, OneToMany, Collection, Cascade } from "@mikro-orm/core";
+import { Entity, PrimaryKey, Property, OneToMany, Collection, Rel, Cascade, ManyToOne } from "@mikro-orm/core";
 import { Entrega } from "./entrega.entity.js";
+import { Zona } from "./zona.entity.js";
 
 @Entity()
 export class Repartidor {
@@ -12,8 +13,8 @@ export class Repartidor {
     apellidoNombre!: String;
     @Property()
     vehiculo!: String;
-    @Property()
-    zona!: String;
+    //@Property()
+    //zona!: String;
 
     @Property()
     disponible: boolean = true;
@@ -21,5 +22,6 @@ export class Repartidor {
     @OneToMany(() => Entrega, (entrega) => entrega.repartidor, { cascade: [Cascade.ALL], })
     entregas = new Collection<Entrega>(this)
 
-
+    @ManyToOne(() => Zona, { nullable: false })
+    zona!: Rel<Zona>;
 }

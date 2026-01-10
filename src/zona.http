@@ -1,0 +1,43 @@
+### obtener todos los tipos de pago
+GET http://localhost:3000/api/v2/tiposDePago
+
+### crear un nuevo tipo de pago
+# @name createTipoPago
+POST http://localhost:3000/api/v2/tiposDePago
+Content-Type: application/json
+
+{
+  "nombre": "Efectivo",
+  "descripcion": "Pagar con dinero fisico"
+}
+
+### ID
+@id = {{createTipoPago.response.body.data.id}}
+
+### obtener un tipo de pago
+GET http://localhost:3000/api/v2/tiposDePago/{{id}}
+
+### modificar un tipo de pago (PUT - recurso completo e idempotente)
+PUT http://localhost:3000/api/v2/tiposDePago/{{id}}
+Content-Type: application/json
+
+{
+  "nombre": "Debito",
+  "descripcion": "Pagar con debito automatico a la cuenta"
+}
+
+### POST TIPO DE PAGO TO DELETE
+# @name createTipoPagoToDelete
+POST http://localhost:3000/api/v2/tiposDePago
+Content-Type: application/json
+
+{
+  "nombre": "Transferencia",
+  "descripcion": "Pagar transfiriendo al CUIL o ALIAS proporcionado por el local"
+}
+
+### DELETE
+@idToDelete = {{createTipoPagoToDelete.response.body.data.id}}
+
+### borrar un tipo de pago
+DELETE http://localhost:3000/api/v2/tiposDePago/{{idToDelete}}

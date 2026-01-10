@@ -12,6 +12,7 @@ import { pagoRouter } from './routes/pagoRoutes.js'
 import { productoRouter } from './routes/productoRoutes.js'
 import { pedidoRouter } from './routes/pedidoRoutes.js'
 import { lineasRouter } from './routes/lineaProductoRoutes.js'
+import { zonaRouter } from './routes/zonaRoutes.js'
 import { authRouter } from './routes/authRoutes.js'
 import dotenv from "dotenv";
 
@@ -42,6 +43,7 @@ app.use('/api/v2/pago', pagoRouter)
 app.use('/api/v2/producto', productoRouter)
 app.use('/api/v2/pedido', pedidoRouter)
 app.use('/api/v2/lineasDeProducto', lineasRouter)
+app.use('/api/v2/zonas', zonaRouter)
 app.use('/api/v2/login',authRouter)
 
 app.use((_, res) => {
