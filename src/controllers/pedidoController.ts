@@ -56,7 +56,7 @@ async function add(req: Request, res: Response) {
 
     const pedido = new Pedido();
     pedido.total = total;
-    pedido.fecha = new Date();
+    pedido.fecha = fecha ? new Date(fecha) : new Date();
     pedido.cliente = cliente;
 
 
