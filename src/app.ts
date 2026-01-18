@@ -15,6 +15,7 @@ import { lineasRouter } from './routes/lineaProductoRoutes.js'
 import { zonaRouter } from './routes/zonaRoutes.js'
 import { authRouter } from './routes/authRoutes.js'
 import dotenv from "dotenv";
+import { authMiddleware } from './middleware/auth.middleware.js'
 
 // Cargar las variables de entorno del archivo .env
 dotenv.config();
@@ -34,17 +35,18 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-app.use('/api/v2/clientes', clienteRouter)
-app.use('/api/v2/repartidores', repartidorRouter)
-app.use('/api/v2/tiposDeProducto', tipoProductoRouter)
-app.use('/api/v2/tiposDePago', tipoPagoRouter)
-app.use('/api/v2/entregas', entregaRouter)
-app.use('/api/v2/pago', pagoRouter)
+app.use('/api/v2/clientes', authMiddleware ,clienteRouter)
+app.use('/api/v2/repartidores', authMiddleware, repartidorRouter)
+app.use('/api/v2/tiposDeProducto', authMiddleware ,tipoProductoRouter)
+app.use('/api/v2/tiposDePago', authMiddleware,  tipoPagoRouter)
+app.use('/api/v2/entregas',authMiddleware, entregaRouter)
+app.use('/api/v2/pago',authMiddleware, pagoRouter)
 app.use('/api/v2/producto', productoRouter)
-app.use('/api/v2/pedido', pedidoRouter)
-app.use('/api/v2/lineasDeProducto', lineasRouter)
-app.use('/api/v2/zonas', zonaRouter)
+app.use('/api/v2/pedido',authMiddleware, pedidoRouter)
+app.use('/api/v2/lineasDeProducto',authMiddleware, lineasRouter)
 app.use('/api/v2/login',authRouter)
+app.use('/api/v2/zonas',authMiddleware,  zonaRouter)
+
 
 app.use((_, res) => {
   return res.status(404).send({ message: 'No se encontro la ruta' })
