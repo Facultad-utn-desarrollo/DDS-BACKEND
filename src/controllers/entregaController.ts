@@ -195,4 +195,40 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-export { findAll, findOne, add, update, remove }
+async function findAllByFilters(req: Request, res: Response) {
+  try {
+    const fechaDesde = req.query.fechaDesde ? new Date(String(req.query.fechaDesde)) : null;
+    const fechaHasta = req.query.fechaHasta ? new Date(String(req.query.fechaHasta)) : null;
+    const clienteId = req.query.clienteId ? Number(req.query.clienteId) : null;
+
+    const filter: any = {};
+
+    if (fechaDesde || fechaHasta) {
+      filter.fecha = {};
+
+      if (fechaDesde) {
+        fechaDesde.setHours(0, 0, 0, 0);
+        filter.fecha.$gte = fechaDesde;
+      }
+
+      if (fechaHasta) {
+        fechaHasta.setHours(23, 59, 59, 999);
+        filter.fecha.$lte = fechaHasta;
+      }
+    }
+
+    if (clienteId) {
+      filter.pedidos = { cliente: { id: clienteId } };
+    }
+
+    const entregas = await em.find(Entrega, filter, {
+      populate: ['repartidor', 'pedidos', 'pedidos.cliente', 'zona'],
+    });
+
+    res.status(200).json({ message: 'Entregas filtradas', data: entregas });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
+export { findAll, findOne, add, update, remove, findAllByFilters }

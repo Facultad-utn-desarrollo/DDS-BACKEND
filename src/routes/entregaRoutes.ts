@@ -1,8 +1,9 @@
 import { Router } from "express";
-import { findAll, findOne, add, update, remove } from '../controllers/entregaController.js';
+import { findAll, findOne, add, update, remove, findAllByFilters } from '../controllers/entregaController.js';
 
 export const entregaRouter = Router()
 
+entregaRouter.get('/filter', findAllByFilters);
 entregaRouter.get('/', findAll)
 entregaRouter.get('/:id', findOne)
 entregaRouter.post('/', add)
