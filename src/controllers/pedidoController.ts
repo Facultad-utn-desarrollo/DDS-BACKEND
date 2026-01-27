@@ -112,6 +112,14 @@ async function update(req: Request, res: Response) {
         }
       }
     }
+
+    let nuevoTotal = 0;
+    pedidoToUpdate.lineas.getItems().forEach((linea) => {
+        nuevoTotal += Number(linea.subtotal);
+    });
+    
+    pedidoToUpdate.total = nuevoTotal;
+    
     console.log('actualizando pedido')
     await em.flush();
 
