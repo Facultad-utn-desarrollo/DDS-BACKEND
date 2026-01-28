@@ -4,6 +4,7 @@ import { Pedido } from '../models/pedido.entity.js'
 import { LineaDeProducto } from '../models/lineaDeProducto.entity.js'
 import { Producto } from '../models/producto.entity.js'
 import { Entrega } from '../models/entrega.entity.js'
+import { Cliente } from '../models/cliente.entity.js'
 
 const em = orm.em
 
@@ -74,7 +75,7 @@ async function add(req: Request, res: Response) {
 
     await em.persistAndFlush(pedido);
 
-    res.status(201).json({ message: 'Pedido creado con éxito!' });
+    res.status(201).json({ message: 'Pedido creado con éxito!', data: pedido });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
@@ -86,41 +87,63 @@ async function update(req: Request, res: Response) {
 
     const pedidoToUpdate = await em.findOneOrFail(Pedido, { nroPedido }, { populate: ['lineas'] });
 
-    em.assign(pedidoToUpdate, req.body);
+    const { lineas, cliente, ...datosCabecera } = req.body;
 
-    if (req.body.lineas && req.body.lineas.length > 0) {
-      for (const linea of pedidoToUpdate.lineas.getItems()) {
-        const found = req.body.lineas.find((updatedLinea: any) => updatedLinea.id === linea.id);
+    em.assign(pedidoToUpdate, datosCabecera);
+
+    if (cliente) {
+        const idCliente = (cliente.id) ? cliente.id : cliente;
+        pedidoToUpdate.cliente = em.getReference(Cliente, idCliente) as any;
+    }
+
+    if (lineas && lineas.length > 0) {
+      
+      const lineasActuales = pedidoToUpdate.lineas.getItems();
+      for (const linea of lineasActuales) {
+        const found = lineas.find((l: any) => l.id === linea.id);
         if (!found) {
           pedidoToUpdate.lineas.remove(linea);
         }
       }
 
-      for (const updatedLinea of req.body.lineas) {
-        if (updatedLinea.id) {
-          const existingLinea = pedidoToUpdate.lineas.getItems().find((linea) => linea.id === updatedLinea.id);
+      for (const lineaData of lineas) {
+        
+        const idProducto = (lineaData.producto && lineaData.producto.codigo) 
+                           ? lineaData.producto.codigo 
+                           : lineaData.producto;
+
+        const productoRef = em.getReference(Producto, idProducto);
+
+        if (lineaData.id) {
+          const existingLinea = pedidoToUpdate.lineas.getItems().find((l) => l.id === lineaData.id);
           if (existingLinea) {
-            existingLinea.cantidad = updatedLinea.cantidad;
-            existingLinea.subtotal = updatedLinea.subtotal;
-          } else {
-            const newLinea = em.create(LineaDeProducto, updatedLinea);
-            pedidoToUpdate.lineas.add(newLinea);
+            existingLinea.cantidad = lineaData.cantidad;
+            existingLinea.subtotal = lineaData.subtotal;
+            existingLinea.producto = productoRef;
           }
         } else {
-          const newLinea = em.create(LineaDeProducto, updatedLinea);
-          pedidoToUpdate.lineas.add(newLinea);
+          const nuevaLinea = em.create(LineaDeProducto, {
+            cantidad: lineaData.cantidad,
+            subtotal: lineaData.subtotal,
+            producto: productoRef,
+            pedido: pedidoToUpdate
+          });
+          
+          pedidoToUpdate.lineas.add(nuevaLinea);
         }
       }
+    } else if (lineas && lineas.length === 0) {
+        pedidoToUpdate.lineas.removeAll();
     }
 
     let nuevoTotal = 0;
     pedidoToUpdate.lineas.getItems().forEach((linea) => {
         nuevoTotal += Number(linea.subtotal);
     });
-    
     pedidoToUpdate.total = nuevoTotal;
+
+    console.log('Actualizando pedido. Nuevo total:', pedidoToUpdate.total);
     
-    console.log('actualizando pedido')
     await em.flush();
 
     res.status(200).json({ message: 'Pedido actualizado!', data: pedidoToUpdate });
@@ -129,10 +152,6 @@ async function update(req: Request, res: Response) {
     res.status(500).json({ message: error.message });
   }
 }
-
-
-
-
 
 async function findAllPedidosByFilters(req: Request, res: Response) {
   try {
@@ -162,7 +181,6 @@ async function findAllPedidosByFilters(req: Request, res: Response) {
       populate: ['cliente', 'entrega', 'pago', 'lineas'],
     });
 
-    // Responder con los pedidos encontrados
     res.status(200).json({ pedidos });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
@@ -203,13 +221,4 @@ async function remove(req: Request, res: Response) {
 
 
 
-export {
-  findAll
-  , findOne,
-  add,
-  update,
-  remove,
-  findPedidosSinPago,
-  findPedidosPagosSinEntrega,
-  findAllPedidosByFilters
-}
+export {findAll, findOne, add, update, remove, findPedidosSinPago, findPedidosPagosSinEntrega, findAllPedidosByFilters}
