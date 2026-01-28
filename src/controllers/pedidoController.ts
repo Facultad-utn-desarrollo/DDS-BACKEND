@@ -21,7 +21,7 @@ async function findAll(req: Request, res: Response) {
 
 async function findPedidosSinPago(req: Request, res: Response) {
   try {
-    const pedidosSinPago = await em.find(Pedido, { pago: null });
+    const pedidosSinPago = await em.find(Pedido, { pago: null }, { populate: ['lineas', 'lineas.producto', 'cliente'] });
     res.status(200).json({ message: 'Se encontraron los pedidos sin pago!', data: pedidosSinPago });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
