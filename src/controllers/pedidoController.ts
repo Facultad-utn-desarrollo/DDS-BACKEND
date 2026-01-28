@@ -11,9 +11,7 @@ const em = orm.em
 async function findAll(req: Request, res: Response) {
   try {
     const pedidos = await em.find(Pedido, {}, { populate: ['cliente', 'lineas', 'pago', 'entrega'] })
-    res
-      .status(200)
-      .json({ message: 'Se encontraron los pedidos!', data: pedidos })
+    res.status(200).json({ message: 'Se encontraron los pedidos!', data: pedidos })
   } catch (error: any) {
     res.status(500).json({ message: error.message })
   }
@@ -21,7 +19,9 @@ async function findAll(req: Request, res: Response) {
 
 async function findPedidosSinPago(req: Request, res: Response) {
   try {
-    const pedidosSinPago = await em.find(Pedido, { pago: null }, { populate: ['lineas', 'lineas.producto', 'cliente'] });
+    const pedidosSinPago = await em.find(Pedido, { pago: null }, { 
+        populate: ['lineas', 'lineas.producto', 'cliente'] 
+    });
     res.status(200).json({ message: 'Se encontraron los pedidos sin pago!', data: pedidosSinPago });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
@@ -37,19 +37,15 @@ async function findPedidosPagosSinEntrega(req: Request, res: Response) {
   }
 }
 
-
 async function findOne(req: Request, res: Response) {
   try {
     const nroPedido = Number.parseInt(req.params.nroPedido)
     const pedidoEncontrado = await em.findOneOrFail(Pedido, { nroPedido }, { populate: ['cliente', 'lineas', 'pago', 'entrega'] })
-    res
-      .status(200)
-      .json({ message: 'se encontro el pedido!', data: pedidoEncontrado })
+    res.status(200).json({ message: 'se encontro el pedido!', data: pedidoEncontrado })
   } catch (error: any) {
     res.status(500).json({ message: error.message })
   }
 }
-
 
 async function add(req: Request, res: Response) {
   try {
@@ -58,24 +54,42 @@ async function add(req: Request, res: Response) {
     const pedido = new Pedido();
     pedido.total = total;
     pedido.fecha = fecha ? new Date(fecha) : new Date();
-    pedido.cliente = cliente;
+    
+    if (cliente) {
+        const idCliente = (cliente.id) ? cliente.id : cliente;
+        pedido.cliente = em.getReference(Cliente, idCliente) as any;
+    }
 
+    if (lineas && lineas.length > 0) {
+        for (const linea of lineas) {
+            const lineaDeProducto = new LineaDeProducto();
+            lineaDeProducto.cantidad = linea.cantidad;
+            lineaDeProducto.subtotal = linea.subtotal;
 
-    for (const linea of lineas) {
-      const lineaDeProducto = new LineaDeProducto();
-      lineaDeProducto.cantidad = linea.cantidad;
-      lineaDeProducto.subtotal = linea.subtotal;
+            const idProducto = (linea.producto && linea.producto.codigo) 
+                               ? linea.producto.codigo 
+                               : linea.producto;
+            
+            const productoEntity = await em.findOneOrFail(Producto, { codigo: idProducto });
 
-      const productoEntity = await em.findOneOrFail(Producto, { codigo: linea.producto.codigo });
+            if (productoEntity.stock < linea.cantidad) {
+                return res.status(400).json({ 
+                    message: `No hay suficiente stock para el producto: ${productoEntity.descripcion}. Stock actual: ${productoEntity.stock}` 
+                });
+            }
 
-      lineaDeProducto.producto = productoEntity;
+            productoEntity.stock -= linea.cantidad;
 
-      pedido.lineas.add(lineaDeProducto);
+            lineaDeProducto.producto = productoEntity;
+
+            pedido.lineas.add(lineaDeProducto);
+        }
     }
 
     await em.persistAndFlush(pedido);
 
     res.status(201).json({ message: 'Pedido creado con éxito!', data: pedido });
+    
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
@@ -85,7 +99,7 @@ async function update(req: Request, res: Response) {
   try {
     const nroPedido = Number.parseInt(req.params.nroPedido);
 
-    const pedidoToUpdate = await em.findOneOrFail(Pedido, { nroPedido }, { populate: ['lineas'] });
+    const pedidoToUpdate = await em.findOneOrFail(Pedido, { nroPedido }, { populate: ['lineas', 'lineas.producto'] });
 
     const { lineas, cliente, ...datosCabecera } = req.body;
 
@@ -99,10 +113,15 @@ async function update(req: Request, res: Response) {
     if (lineas && lineas.length > 0) {
       
       const lineasActuales = pedidoToUpdate.lineas.getItems();
-      for (const linea of lineasActuales) {
-        const found = lineas.find((l: any) => l.id === linea.id);
+      
+      for (const lineaActual of lineasActuales) {
+        const found = lineas.find((l: any) => l.id === lineaActual.id);
+        
         if (!found) {
-          pedidoToUpdate.lineas.remove(linea);
+          if (lineaActual.producto) {
+              lineaActual.producto.stock += lineaActual.cantidad;
+          }
+          pedidoToUpdate.lineas.remove(lineaActual);
         }
       }
 
@@ -112,20 +131,42 @@ async function update(req: Request, res: Response) {
                            ? lineaData.producto.codigo 
                            : lineaData.producto;
 
-        const productoRef = em.getReference(Producto, idProducto);
+        const productoEntity = await em.findOneOrFail(Producto, { codigo: idProducto });
 
         if (lineaData.id) {
           const existingLinea = pedidoToUpdate.lineas.getItems().find((l) => l.id === lineaData.id);
+          
           if (existingLinea) {
+            const diferencia = lineaData.cantidad - existingLinea.cantidad;
+
+            if (diferencia !== 0) {
+                 if (diferencia > 0 && productoEntity.stock < diferencia) {
+                    return res.status(400).json({ 
+                        message: `No hay suficiente stock para aumentar ${productoEntity.descripcion}.` 
+                    });
+                 }
+                 productoEntity.stock -= diferencia;
+            }
+
             existingLinea.cantidad = lineaData.cantidad;
             existingLinea.subtotal = lineaData.subtotal;
-            existingLinea.producto = productoRef;
+            existingLinea.producto = productoEntity; 
           }
+
         } else {
+
+          if (productoEntity.stock < lineaData.cantidad) {
+            return res.status(400).json({ 
+                message: `No hay suficiente stock para agregar: ${productoEntity.descripcion}` 
+            });
+          }
+          
+          productoEntity.stock -= lineaData.cantidad;
+
           const nuevaLinea = em.create(LineaDeProducto, {
             cantidad: lineaData.cantidad,
             subtotal: lineaData.subtotal,
-            producto: productoRef,
+            producto: productoEntity,
             pedido: pedidoToUpdate
           });
           
@@ -133,6 +174,9 @@ async function update(req: Request, res: Response) {
         }
       }
     } else if (lineas && lineas.length === 0) {
+        for (const linea of pedidoToUpdate.lineas) {
+            linea.producto.stock += linea.cantidad;
+        }
         pedidoToUpdate.lineas.removeAll();
     }
 
@@ -187,13 +231,13 @@ async function findAllPedidosByFilters(req: Request, res: Response) {
   }
 }
 
-
-
+// --- BORRAR PEDIDO Y DEVOLVER STOCK ---
 async function remove(req: Request, res: Response) {
   try {
     const nroPedido = Number.parseInt(req.params.nroPedido);
 
-    const pedido = await em.findOneOrFail(Pedido, { nroPedido }, { populate: ['lineas'] });
+    // Es crucial cargar 'lineas.producto' para poder devolver el stock
+    const pedido = await em.findOneOrFail(Pedido, { nroPedido }, { populate: ['lineas', 'lineas.producto'] });
 
     if (pedido.pago) {
       await em.removeAndFlush(pedido.pago);
@@ -201,24 +245,30 @@ async function remove(req: Request, res: Response) {
 
     if (pedido.entrega) {
       const entrega = await em.findOneOrFail(Entrega, { id: pedido.entrega.id });
-
       entrega.pedidos.remove(pedido);
       await em.flush();
     }
 
     if (pedido.lineas && pedido.lineas.isInitialized()) {
-      await em.removeAndFlush(pedido.lineas.getItems());
+      const lineas = pedido.lineas.getItems();
+      
+      // STOCK LOGIC: Devolver stock antes de borrar las líneas
+      for (const linea of lineas) {
+          if (linea.producto) {
+              // Sumamos la cantidad de vuelta al producto
+              linea.producto.stock += linea.cantidad;
+          }
+      }
+      
+      await em.removeAndFlush(lineas);
     }
 
     await em.removeAndFlush(pedido);
 
-    res.status(200).json({ message: 'Pedido, pago, lineas de productos y relación de entrega eliminados correctamente.' });
+    res.status(200).json({ message: 'Pedido eliminado y stock restaurado.' });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
 }
-
-
-
 
 export {findAll, findOne, add, update, remove, findPedidosSinPago, findPedidosPagosSinEntrega, findAllPedidosByFilters}
