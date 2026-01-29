@@ -32,6 +32,6 @@ export class Pedido {
   })
   lineas = new Collection<LineaDeProducto>(this);
   
-  @ManyToOne({ entity: () => User, nullable: true,cascade: [Cascade.MERGE] })
-  user!: Rel<User>; // Relación con el User, un Pedido siempre debe pertenecer a un User
+  /* @ManyToOne({ entity: () => User, nullable: true,cascade: [Cascade.MERGE] })
+  user!: Rel<User>; */ // Relación con el User, un Pedido siempre debe pertenecer a un User
 }

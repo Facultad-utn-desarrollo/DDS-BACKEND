@@ -1,6 +1,7 @@
-import { Entity, PrimaryKey, Property, OneToMany, Collection, Rel, Cascade, ManyToOne } from "@mikro-orm/core";
+import { Entity, PrimaryKey, Property, OneToMany, Collection, Rel, Cascade, ManyToOne, OneToOne } from "@mikro-orm/core";
 import { Pedido } from "./pedido.entity.js";
 import { Zona } from "./zona.entity.js";
+import { User } from "./user.entity.js";
 
 @Entity()
 export class Cliente {
