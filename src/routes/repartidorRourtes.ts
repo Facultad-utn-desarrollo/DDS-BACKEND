@@ -1,13 +1,14 @@
 import { Router } from "express";
 import { findAll, findOne, add, update, remove, findRepartidoresActivos } from '../controllers/repartidorController.js';
+import { adminOnly } from "../middleware/adminOnly.js";
 
 
 export const repartidorRouter = Router()
 
-repartidorRouter.get('/', findAll)
-repartidorRouter.get('/activos/', findRepartidoresActivos)
-repartidorRouter.get('/:id', findOne)
-repartidorRouter.post('/', add)
-repartidorRouter.put('/:id', update)
-repartidorRouter.patch('/:id', update)
-repartidorRouter.delete('/:id', remove)
+repartidorRouter.get('/', adminOnly, findAll)
+repartidorRouter.get('/activos/',  adminOnly,findRepartidoresActivos)
+repartidorRouter.get('/:id', adminOnly, findOne)
+repartidorRouter.post('/', adminOnly, add)
+repartidorRouter.put('/:id', adminOnly, update)
+repartidorRouter.patch('/:id',  adminOnly,update)
+repartidorRouter.delete('/:id', adminOnly, remove)

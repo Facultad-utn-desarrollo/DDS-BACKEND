@@ -1,12 +1,13 @@
 import { Router } from 'express';
 import { findAll, findOne, add, update, remove } from '../controllers/pagoController.js';
+import { adminOnly } from '../middleware/adminOnly.js';
 
 
 export const pagoRouter = Router()
 
-pagoRouter.get('/', findAll)
-pagoRouter.get('/:id', findOne)
+pagoRouter.get('/', adminOnly, findAll)
+pagoRouter.get('/:id', adminOnly, findOne)
 pagoRouter.post('/', add)
-pagoRouter.put('/:id', update)
-pagoRouter.patch('/:id', update)
-pagoRouter.delete('/:id', remove)
+pagoRouter.put('/:id', adminOnly, update)
+pagoRouter.patch('/:id', adminOnly, update)
+pagoRouter.delete('/:id', adminOnly, remove)

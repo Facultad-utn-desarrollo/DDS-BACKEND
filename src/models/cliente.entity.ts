@@ -16,7 +16,7 @@ export class Cliente {
   apellidoNombre!: string;
 
   @Property()
-  telefono!: number;
+  telefono!: number; 
 
   @Property()
   email!: string;
@@ -30,8 +30,9 @@ export class Cliente {
   @Property()
   disponible:boolean = true;
 
-  @ManyToOne(() => Zona, { nullable: false })
-    zona!: Rel<Zona>;
+
+  @ManyToOne(() => Zona, { nullable: true }) 
+  zona?: Rel<Zona>;
 
   @OneToMany(() => Pedido, (pedido) => pedido.cliente, { cascade: [Cascade.ALL], joinColumn: 'nroPedido', inverseJoinColumn: 'cuit' })
   pedidos = new Collection<Pedido>(this);

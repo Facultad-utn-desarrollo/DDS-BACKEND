@@ -3,17 +3,62 @@ import bcrypt from 'bcryptjs';
 import {User} from '../models/user.entity.js';
 import { orm } from '../shared/db/orm.js';
 import { EntityManager } from '@mikro-orm/mysql';
+import { Zona } from '../models/zona.entity.js';
+import { Cliente } from '../models/cliente.entity.js';
+import { UserRole } from '../models/userrole..js';
 const em = orm.em;
 
+const register = async (req: any, res: any) => {
+  const em = orm.em.fork();
 
-const register = async(req: any, res: any) => {
   try {
-      const { username, password } = req.body;
-      const hashedPassword = await bcrypt.hash(password, 10);
-      const newUser = await createUser(username, hashedPassword);
-      res.status(201).json({ message: "Usuario registrado", user: newUser });
+    const {
+      username,
+      password,
+      cuit,
+      apellidoNombre,
+      telefono,
+      email,
+      domicilio,
+    } = req.body;
+
+    // 1️⃣ validar user
+    const existingUser = await em.findOne(User, { username });
+    if (existingUser) {
+      return res.status(400).json({ message: 'El usuario ya existe' });
+    }
+
+    // 2️⃣ hash
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // 3️⃣ crear cliente
+    const cliente = em.create(Cliente, {
+      cuit,
+      apellidoNombre,
+      telefono,
+      email,
+      domicilio,
+      disponible: true,
+    });
+
+    // 4️⃣ crear user
+    const user = em.create(User, {
+      username,
+      password: hashedPassword,
+      isActive: true,
+      role: UserRole.CLIENTE,
+      cliente,
+    });
+
+    await em.persistAndFlush([cliente, user]);
+
+    return res.status(201).json({
+      message: 'Usuario y cliente creados correctamente',
+    });
+
   } catch (error) {
-      res.status(500).json({ error: error });
+    console.error(error);
+    return res.status(500).json({ message: 'Error al registrar usuario' });
   }
 };
 
@@ -38,16 +83,19 @@ async function login(req: any, res: any) {
   }
 
   const secret = process.env.JWT_SECRET || 'fallback_secret'; // Evitar error si falta la variable
-  const expiration = process.env.JWT_EXPIRATION || "1h";
+  //const expiration = process.env.JWT_EXPIRATION || "1h";
   
   if (!secret) {
     throw new Error("JWT_SECRET no está definido en el archivo .env");
   }
   
   const token = jwt.sign(
-    { userId: user.id, username: user.username },
-    secret as string, // Asegurar que TypeScript lo trate como string
-    { expiresIn: 3600 }  // 1 hora en segundos
+  {
+    userId: user.id, 
+    role: user.role,
+  },
+  secret,
+  { expiresIn: '1h' }
   );
   
 

@@ -1,12 +1,13 @@
 import { Router } from 'express';
 import { findAll, findOne, add, update, remove, findZonasActivas } from '../controllers/zonaController.js';
+import { adminOnly } from '../middleware/adminOnly.js';
 
 export const zonaRouter = Router()
 
-zonaRouter.get('/', findAll)
-zonaRouter.get('/activos/', findZonasActivas)
-zonaRouter.get('/:id', findOne)
-zonaRouter.post('/', add)
-zonaRouter.put('/:id', update)
-zonaRouter.patch('/:id', update)
-zonaRouter.delete('/:id', remove)
+zonaRouter.get('/', adminOnly, findAll)
+zonaRouter.get('/activos/',  adminOnly,findZonasActivas)
+zonaRouter.get('/:id', adminOnly, findOne)
+zonaRouter.post('/',  adminOnly,add)
+zonaRouter.put('/:id', adminOnly, update)
+zonaRouter.patch('/:id', adminOnly, update)
+zonaRouter.delete('/:id',  adminOnly, remove)
