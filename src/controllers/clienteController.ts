@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express'
 import { Cliente } from '../models/cliente.entity.js'
 import { Zona } from '../models/zona.entity.js' 
 import { orm } from '../shared/db/orm.js'
+import { User } from '../models/user.entity.js'
 
 const em = orm.em
 
@@ -107,4 +108,20 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-export { findAll, findOne, add, update, remove, findClientesActivos }
+async function findMyself(req: any, res: Response) {
+  try {
+    const userId = req.user.userId;
+    
+    const user = await em.findOne(User, { id: userId }, { populate: ['cliente', 'cliente.zona'] });
+
+    if (!user || !user.cliente) {
+      return res.status(404).json({ message: 'No se encontró perfil de cliente asociado' });
+    }
+
+    res.status(200).json({ message: 'Perfil encontrado', data: user.cliente });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
+export { findAll, findOne, add, update, remove, findClientesActivos, findMyself }

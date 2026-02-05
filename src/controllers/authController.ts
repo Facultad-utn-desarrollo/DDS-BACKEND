@@ -75,15 +75,13 @@ async function login(req: any, res: any) {
   }
 
   
-  // Verificar si la contraseña es correcta usando await
   const isMatch = await bcrypt.compare(password, user.password);
 
   if (!isMatch) {
     return res.status(401).json({ message: "Credenciales incorrectas" });
   }
 
-  const secret = process.env.JWT_SECRET || 'fallback_secret'; // Evitar error si falta la variable
-  //const expiration = process.env.JWT_EXPIRATION || "1h";
+  const secret = process.env.JWT_SECRET || 'fallback_secret';
   
   if (!secret) {
     throw new Error("JWT_SECRET no está definido en el archivo .env");
@@ -114,10 +112,9 @@ const createUser = async (username: string, hashedPassword: string) => {
   user.username = username;
   user.password = hashedPassword;
 
-  // Guardar el usuario en la base de datos
   await em.persistAndFlush(user);
 
-  return user; // Retorna el objeto User recién creado
+  return user; 
 };
 
 export { login, register }
