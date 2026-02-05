@@ -45,7 +45,7 @@ app.use('/api/v2/producto', productoRouter)
 app.use('/api/v2/pedido',authMiddleware, pedidoRouter)
 app.use('/api/v2/lineasDeProducto',authMiddleware, lineasRouter)
 app.use('/api/v2/login',authRouter)
-app.use('/api/v2/zonas',authMiddleware,  zonaRouter)
+app.use('/api/v2/zonas',  zonaRouter)
 
 
 app.use((_, res) => {

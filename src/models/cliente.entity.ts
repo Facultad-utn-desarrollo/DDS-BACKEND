@@ -10,13 +10,13 @@ export class Cliente {
   id?: number
 
   @Property()
-  cuit!: number;
+  cuit!: string;
 
   @Property()
   apellidoNombre!: string;
 
   @Property()
-  telefono!: number; 
+  telefono!: string; 
 
   @Property()
   email!: string;
@@ -38,9 +38,9 @@ export class Cliente {
   pedidos = new Collection<Pedido>(this);
 
   constructor(
-    cuit: number,
+    cuit: string,
     apellidoNombre: string,
-    telefono: number,
+    telefono: string,
     email: string,
     domicilio: string,
     pedidos: Collection<Pedido>

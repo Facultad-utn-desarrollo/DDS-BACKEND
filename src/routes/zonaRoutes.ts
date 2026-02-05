@@ -4,8 +4,8 @@ import { adminOnly } from '../middleware/adminOnly.js';
 
 export const zonaRouter = Router()
 
+zonaRouter.get('/activos/', findZonasActivas)
 zonaRouter.get('/', adminOnly, findAll)
-zonaRouter.get('/activos/',  adminOnly,findZonasActivas)
 zonaRouter.get('/:id', adminOnly, findOne)
 zonaRouter.post('/',  adminOnly,add)
 zonaRouter.put('/:id', adminOnly, update)
