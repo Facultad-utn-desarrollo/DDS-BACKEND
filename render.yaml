@@ -3,6 +3,7 @@ services:
     name: dds-backend
     env: node
     plan: free
+    rootDir: .
     buildCommand: npm install && npm run build
     startCommand: npm run start
     autoDeploy: true
