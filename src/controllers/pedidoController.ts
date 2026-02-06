@@ -5,6 +5,7 @@ import { LineaDeProducto } from '../models/lineaDeProducto.entity.js'
 import { Producto } from '../models/producto.entity.js'
 import { Entrega } from '../models/entrega.entity.js'
 import { Cliente } from '../models/cliente.entity.js'
+import { User } from '../models/user.entity.js'
 
 const em = orm.em
 
@@ -231,12 +232,10 @@ async function findAllPedidosByFilters(req: Request, res: Response) {
   }
 }
 
-// --- BORRAR PEDIDO Y DEVOLVER STOCK ---
 async function remove(req: Request, res: Response) {
   try {
     const nroPedido = Number.parseInt(req.params.nroPedido);
 
-    // Es crucial cargar 'lineas.producto' para poder devolver el stock
     const pedido = await em.findOneOrFail(Pedido, { nroPedido }, { populate: ['lineas', 'lineas.producto'] });
 
     if (pedido.pago) {
@@ -252,10 +251,8 @@ async function remove(req: Request, res: Response) {
     if (pedido.lineas && pedido.lineas.isInitialized()) {
       const lineas = pedido.lineas.getItems();
       
-      // STOCK LOGIC: Devolver stock antes de borrar las líneas
       for (const linea of lineas) {
           if (linea.producto) {
-              // Sumamos la cantidad de vuelta al producto
               linea.producto.stock += linea.cantidad;
           }
       }
@@ -271,4 +268,24 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-export {findAll, findOne, add, update, remove, findPedidosSinPago, findPedidosPagosSinEntrega, findAllPedidosByFilters}
+async function findMisPedidos(req: any, res: Response) {
+  try {
+    const userId = req.user.userId;
+
+    const user = await em.findOne(User, { id: userId }, { populate: ['cliente'] });
+
+    if (!user || !user.cliente) {
+      return res.status(200).json({ message: 'No tiene perfil de cliente', data: [] });
+    }
+
+    const pedidos = await em.find(Pedido, { cliente: user.cliente }, { 
+      populate: ['cliente', 'lineas', 'pago', 'entrega'] 
+    });
+
+    res.status(200).json({ message: 'Mis pedidos encontrados', data: pedidos });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
+export {findAll, findOne, add, update, remove, findPedidosSinPago, findPedidosPagosSinEntrega, findAllPedidosByFilters, findMisPedidos}

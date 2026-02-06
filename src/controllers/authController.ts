@@ -20,28 +20,28 @@ const register = async (req: any, res: any) => {
       telefono,
       email,
       domicilio,
+      zona
     } = req.body;
 
-    // 1️⃣ validar user
     const existingUser = await em.findOne(User, { username });
     if (existingUser) {
       return res.status(400).json({ message: 'El usuario ya existe' });
     }
 
-    // 2️⃣ hash
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 3️⃣ crear cliente
+    const zonaRef = zona && zona.id ? em.getReference(Zona, zona.id) : undefined;
+
     const cliente = em.create(Cliente, {
       cuit,
       apellidoNombre,
       telefono,
       email,
       domicilio,
+      zona: zonaRef,
       disponible: true,
     });
 
-    // 4️⃣ crear user
     const user = em.create(User, {
       username,
       password: hashedPassword,
@@ -75,15 +75,13 @@ async function login(req: any, res: any) {
   }
 
   
-  // Verificar si la contraseña es correcta usando await
   const isMatch = await bcrypt.compare(password, user.password);
 
   if (!isMatch) {
     return res.status(401).json({ message: "Credenciales incorrectas" });
   }
 
-  const secret = process.env.JWT_SECRET || 'fallback_secret'; // Evitar error si falta la variable
-  //const expiration = process.env.JWT_EXPIRATION || "1h";
+  const secret = process.env.JWT_SECRET || 'fallback_secret';
   
   if (!secret) {
     throw new Error("JWT_SECRET no está definido en el archivo .env");
@@ -114,10 +112,9 @@ const createUser = async (username: string, hashedPassword: string) => {
   user.username = username;
   user.password = hashedPassword;
 
-  // Guardar el usuario en la base de datos
   await em.persistAndFlush(user);
 
-  return user; // Retorna el objeto User recién creado
+  return user; 
 };
 
 export { login, register }

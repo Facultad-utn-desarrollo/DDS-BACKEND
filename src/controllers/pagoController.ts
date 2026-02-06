@@ -3,13 +3,13 @@ import { Pago } from '../models/pago.entity.js';
 import { orm } from '../shared/db/orm.js';
 import { TipoPago } from '../models/tipoPago.entity.js';
 import { Pedido } from '../models/pedido.entity.js';
+import { User } from '../models/user.entity.js';
 
 const em = orm.em;
 
 async function findAll(req: Request, res: Response) {
   try {
     const pagos = await em.find(Pago, {}, { populate: ['pedido', 'tipoPago'] });
-    // Estandarizamos a 'data' para que el frontend lo lea siempre igual
     res.status(200).json({ message: 'Pagos encontrados', data: pagos });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
@@ -26,19 +26,40 @@ async function findOne(req: Request, res: Response) {
   }
 }
 
+async function findMisPagos(req: any, res: Response) {
+  try {
+    const userId = req.user.userId; 
+
+    const user = await em.findOne(User, { id: userId }, { populate: ['cliente'] });
+
+    if (!user || !user.cliente) {
+      return res.status(200).json({ message: 'No tiene perfil de cliente', data: [] });
+    }
+
+    const pagos = await em.find(Pago, { 
+      pedido: { 
+        cliente: user.cliente 
+      } 
+    }, { 
+      populate: ['pedido', 'tipoPago'] 
+    });
+
+    res.status(200).json({ message: 'Mis pagos encontrados', data: pagos });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
 async function add(req: Request, res: Response) {
   try {
-    // 1. Quitamos 'id' para evitar el error de Foreign Key 0
     const { id, tipoPago, pedido, ...pagoData } = req.body;
 
-    // 2. Validar TipoPago
     let tipoPagoEntity;
     if (tipoPago?.id) {
       tipoPagoEntity = await em.findOne(TipoPago, tipoPago.id);
       if (!tipoPagoEntity) return res.status(404).json({ message: 'Tipo de Pago no encontrado' });
     }
 
-    // 3. Validar Pedido
     let pedidoEntity;
     if (pedido?.nroPedido) {
       pedidoEntity = await em.findOne(Pedido, pedido.nroPedido);
@@ -47,7 +68,6 @@ async function add(req: Request, res: Response) {
         return res.status(400).json({ message: 'El pago debe estar asociado a un pedido.' });
     }
 
-    // 4. VALIDACIÓN DE FECHA (Pago vs Pedido)
     const fechaPago = pagoData.fecha ? new Date(pagoData.fecha) : new Date();
     fechaPago.setHours(0,0,0,0);
 
@@ -58,7 +78,6 @@ async function add(req: Request, res: Response) {
         return res.status(400).json({ message: `La fecha del pago no puede ser anterior a la del pedido (${pedidoEntity.fecha.toLocaleDateString()})` });
     }
 
-    // 5. Crear y Guardar
     const pago = em.create(Pago, { 
         ...pagoData, 
         fecha: fechaPago,
@@ -83,11 +102,9 @@ async function update(req: Request, res: Response) {
 
     const pagoToUpdate = await em.findOneOrFail(Pago, { id }, { populate: ['pedido', 'tipoPago'] });
 
-    // 1. Validar Fecha
     let fechaEfectivaPago = fecha ? new Date(fecha) : new Date(pagoToUpdate.fecha);
     fechaEfectivaPago.setHours(0,0,0,0);
 
-    // Determinar pedido (nuevo o actual)
     let pedidoEntity = pagoToUpdate.pedido;
     if (pedido && pedido.nroPedido && pedido.nroPedido !== pagoToUpdate.pedido.nroPedido) {
          pedidoEntity = await em.findOneOrFail(Pedido, pedido.nroPedido);
@@ -100,7 +117,6 @@ async function update(req: Request, res: Response) {
         return res.status(400).json({ message: `La fecha del pago no puede ser anterior a la del pedido (${pedidoEntity.fecha.toLocaleDateString()})` });
     }
 
-    // 2. Aplicar cambios
     if (fecha) pagoToUpdate.fecha = new Date(fecha);
     
     if (tipoPago && tipoPago.id !== pagoToUpdate.tipoPago.id) {
@@ -137,4 +153,4 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-export { findAll, add, findOne, update, remove };
+export { findAll, add, findOne, update, remove,findMisPagos };
