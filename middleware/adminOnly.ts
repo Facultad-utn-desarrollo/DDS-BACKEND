@@ -1,5 +1,5 @@
 import { Response, NextFunction } from 'express';
-import { AuthRequest } from './auth.middleware';
+import { AuthRequest } from './auth.middleware.js';
 
 export const adminOnly = (
   req: AuthRequest,
@@ -10,4 +10,4 @@ export const adminOnly = (
     return res.status(403).json({ message: 'Acceso solo para administradores' });
   }
   next();
-};
+}; 
