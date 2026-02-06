@@ -1,9 +1,25 @@
-services:
-  - type: web
-    name: dds-backend
-    env: node
-    plan: free
-    rootDir: .
-    buildCommand: npm install && npm run build
-    startCommand: npm run start
-    autoDeploy: true
+# Exported from Render on 2026-02-06T05:21:00Z
+version: "1"
+projects:
+- name: productos
+  environments:
+  - name: Production
+    services:
+    - type: web
+      name: DDS-BACKEND
+      runtime: node
+      repo: https://github.com/AlfreReinoso/DDS-BACKEND
+      plan: free
+      region: frankfurt
+      buildCommand: npm install && npm run build
+      startCommand: 'npm start '
+      autoDeployTrigger: commit
+    - type: web
+      name: DDS-BACKEND-A
+      runtime: node
+      repo: https://github.com/AlfreReinoso/DDS-BACKEND-A
+      plan: free
+      region: frankfurt
+      buildCommand: npm install && npm run build
+      startCommand: npm run start
+      autoDeployTrigger: commit
