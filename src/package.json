@@ -1,0 +1,8 @@
+{
+  "name": "dds-backend-src",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "start": "node ../dist/app.js"
+  }
+}
