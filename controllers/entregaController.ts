@@ -231,4 +231,23 @@ async function findAllByFilters(req: Request, res: Response) {
   }
 }
 
-export { findAll, findOne, add, update, remove, findAllByFilters, findMisEntregas }
+async function findMisPedidosParaEntrega(req: any, res: Response) {
+  try {
+    const userId = req.user.userId;
+    const user = await em.findOne(User, { id: userId }, { populate: ['cliente'] });
+
+    if (!user || !user.cliente) return res.json({ data: [] });
+
+    const pedidos = await em.find(Pedido, {
+        cliente: user.cliente,
+        pago: { $ne: null },
+        entrega: null
+    }, {
+        populate: ['cliente', 'cliente.zona'] 
+    });
+
+    res.status(200).json({ data: pedidos });
+  } catch (error: any) { res.status(500).json({ message: error.message }); }
+}
+
+export { findAll, findOne, add, update, remove, findAllByFilters, findMisEntregas,findMisPedidosParaEntrega }

@@ -38,14 +38,20 @@ async function findPedidosPagosSinEntrega(req: Request, res: Response) {
   }
 }
 
-async function findOne(req: Request, res: Response) {
+async function findOne(req: any, res: Response) {
   try {
-    const nroPedido = Number.parseInt(req.params.nroPedido)
-    const pedidoEncontrado = await em.findOneOrFail(Pedido, { nroPedido }, { populate: ['cliente', 'lineas', 'pago', 'entrega'] })
-    res.status(200).json({ message: 'se encontro el pedido!', data: pedidoEncontrado })
-  } catch (error: any) {
-    res.status(500).json({ message: error.message })
-  }
+    const nroPedido = Number(req.params.nroPedido);
+    const userId = req.user.userId;
+    const user = await em.findOne(User, { id: userId }, { populate: ['cliente'] });
+
+    const pedido = await em.findOneOrFail(Pedido, { nroPedido }, { populate: ['cliente', 'lineas', 'pago', 'entrega', 'lineas.producto'] });
+
+    if (req.user.role !== 'admin' && pedido.cliente.id !== user?.cliente?.id) {
+        return res.status(403).json({ message: 'No tienes permiso para ver este pedido' });
+    }
+
+    res.status(200).json({ message: 'Encontrado', data: pedido });
+  } catch (error: any) { res.status(500).json({ message: error.message }); }
 }
 
 async function add(req: Request, res: Response) {
@@ -96,11 +102,23 @@ async function add(req: Request, res: Response) {
   }
 }
 
-async function update(req: Request, res: Response) {
+async function update(req: any, res: Response) {
   try {
     const nroPedido = Number.parseInt(req.params.nroPedido);
+    const userId = req.user?.userId;
+    const userRole = req.user?.role;
 
     const pedidoToUpdate = await em.findOneOrFail(Pedido, { nroPedido }, { populate: ['lineas', 'lineas.producto'] });
+
+    if (userRole !== 'admin') {
+        const user = await em.findOne(User, { id: userId }, { populate: ['cliente'] });
+        if (pedidoToUpdate.cliente.id !== user?.cliente?.id) {
+            return res.status(403).json({ message: 'No tienes permiso para editar este pedido.' });
+        }
+        if (pedidoToUpdate.pago) {
+             return res.status(400).json({ message: 'No se puede editar un pedido ya pagado.' });
+        }
+    }
 
     const { lineas, cliente, ...datosCabecera } = req.body;
 
@@ -232,11 +250,23 @@ async function findAllPedidosByFilters(req: Request, res: Response) {
   }
 }
 
-async function remove(req: Request, res: Response) {
+async function remove(req: any, res: Response) {
   try {
     const nroPedido = Number.parseInt(req.params.nroPedido);
+    const userId = req.user?.userId;
+    const userRole = req.user?.role;
 
     const pedido = await em.findOneOrFail(Pedido, { nroPedido }, { populate: ['lineas', 'lineas.producto'] });
+
+    if (userRole !== 'admin') {
+        const user = await em.findOne(User, { id: userId }, { populate: ['cliente'] });
+        if (pedido.cliente.id !== user?.cliente?.id) {
+            return res.status(403).json({ message: 'No tienes permiso para eliminar este pedido.' });
+        }
+        if (pedido.entrega) {
+             return res.status(400).json({ message: 'No se puede eliminar un pedido ya entregado.' });
+        }
+    }
 
     if (pedido.pago) {
       await em.removeAndFlush(pedido.pago);
@@ -288,4 +318,19 @@ async function findMisPedidos(req: any, res: Response) {
   }
 }
 
-export {findAll, findOne, add, update, remove, findPedidosSinPago, findPedidosPagosSinEntrega, findAllPedidosByFilters, findMisPedidos}
+async function findMisPedidosImpagos(req: any, res: Response) {
+  try {
+    const userId = req.user.userId;
+    const user = await em.findOne(User, { id: userId }, { populate: ['cliente'] });
+    if (!user || !user.cliente) return res.json({ data: [] });
+
+    const pedidos = await em.find(Pedido, { 
+        cliente: user.cliente, 
+        pago: null 
+    }, { populate: ['lineas', 'lineas.producto'] });
+
+    res.status(200).json({ data: pedidos });
+  } catch (error: any) { res.status(500).json({ message: error.message }); }
+}
+
+export {findAll, findOne, add, update, remove, findPedidosSinPago, findPedidosPagosSinEntrega, findAllPedidosByFilters, findMisPedidos,findMisPedidosImpagos}

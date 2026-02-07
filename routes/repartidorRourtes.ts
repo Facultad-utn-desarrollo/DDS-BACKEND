@@ -6,7 +6,7 @@ import { adminOnly } from "../middleware/adminOnly.js";
 export const repartidorRouter = Router()
 
 repartidorRouter.get('/', adminOnly, findAll)
-repartidorRouter.get('/activos/',  adminOnly,findRepartidoresActivos)
+repartidorRouter.get('/activos/',findRepartidoresActivos)
 repartidorRouter.get('/:id', adminOnly, findOne)
 repartidorRouter.post('/', adminOnly, add)
 repartidorRouter.put('/:id', adminOnly, update)

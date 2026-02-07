@@ -4,8 +4,8 @@ import { adminOnly } from '../middleware/adminOnly.js';
 
 export const tipoPagoRouter = Router()
 
+tipoPagoRouter.get('/activos/', findTiposDePagoActivos)
 tipoPagoRouter.get('/', adminOnly, findAll)
-tipoPagoRouter.get('/activos/', adminOnly, findTiposDePagoActivos)
 tipoPagoRouter.get('/:id', adminOnly, findOne)
 tipoPagoRouter.post('/',  adminOnly,add)
 tipoPagoRouter.put('/:id', adminOnly, update)

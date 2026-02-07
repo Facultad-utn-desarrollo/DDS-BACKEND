@@ -8,7 +8,7 @@ export const pagoRouter = Router()
 
 pagoRouter.get('/mis-pagos', authMiddleware, findMisPagos);
 pagoRouter.get('/', adminOnly, findAll)
-pagoRouter.get('/:id', adminOnly, findOne)
+pagoRouter.get('/:id',adminOnly, findOne)
 pagoRouter.post('/', add)
 pagoRouter.put('/:id', adminOnly, update)
 pagoRouter.patch('/:id', adminOnly, update)

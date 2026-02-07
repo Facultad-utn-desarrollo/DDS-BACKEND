@@ -38,14 +38,14 @@ app.use(cors(corsOptions));
 app.use('/api/v2/clientes', authMiddleware ,clienteRouter)
 app.use('/api/v2/repartidores', authMiddleware, repartidorRouter)
 app.use('/api/v2/tiposDeProducto', authMiddleware ,tipoProductoRouter)
-app.use('/api/v2/tiposDePago', authMiddleware,  tipoPagoRouter)
+app.use('/api/v2/tiposDePago', authMiddleware, tipoPagoRouter)
 app.use('/api/v2/entregas',authMiddleware, entregaRouter)
 app.use('/api/v2/pago',authMiddleware, pagoRouter)
-app.use('/api/v2/producto', productoRouter)
+app.use('/api/v2/producto',authMiddleware, productoRouter)
 app.use('/api/v2/pedido',authMiddleware, pedidoRouter)
 app.use('/api/v2/lineasDeProducto',authMiddleware, lineasRouter)
 app.use('/api/v2/login',authRouter)
-app.use('/api/v2/zonas',  zonaRouter)
+app.use('/api/v2/zonas', zonaRouter)
 
 
 app.use((_, res) => {

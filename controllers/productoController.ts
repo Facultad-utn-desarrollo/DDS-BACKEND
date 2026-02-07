@@ -35,7 +35,7 @@ async function findAllByFilters(req: Request, res: Response) {
     const tipoProductoFilter = req.query.tipoProducto ? Number(req.query.tipoProducto) : null;
     const precioMinimo = req.query.precioMinimo ? Number(req.query.precioMinimo) : null;
     const precioMaximo = req.query.precioMaximo ? Number(req.query.precioMaximo) : null;
-
+    const disponible = req.query.disponible;
 
     const filter: any = {};
 
@@ -57,6 +57,10 @@ async function findAllByFilters(req: Request, res: Response) {
       if (precioMaximo) {
         filter.precio.$lte = precioMaximo;
       }
+    }
+
+    if (disponible !== undefined && disponible !== null && disponible !== 'null') {
+        filter.disponible = (disponible === 'true');
     }
 
     const productos = await em.find(Producto, filter, {
