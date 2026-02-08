@@ -37,15 +37,15 @@ app.use(cors(corsOptions));
 
 app.use('/api/v2/clientes', authMiddleware ,clienteRouter)
 app.use('/api/v2/repartidores', authMiddleware, repartidorRouter)
-app.use('/api/v2/tiposDeProducto', authMiddleware ,tipoProductoRouter)
+app.use('/api/v2/tiposDeProducto',tipoProductoRouter) //no se necesita auth para ver los tipos de producto, es info que puede ser publica
 app.use('/api/v2/tiposDePago', authMiddleware, tipoPagoRouter)
 app.use('/api/v2/entregas',authMiddleware, entregaRouter)
 app.use('/api/v2/pago',authMiddleware, pagoRouter)
-app.use('/api/v2/producto',authMiddleware, productoRouter)
+app.use('/api/v2/producto', productoRouter) //no se necesita auth para ver los productos, es info que puede ser publica
 app.use('/api/v2/pedido',authMiddleware, pedidoRouter)
 app.use('/api/v2/lineasDeProducto',authMiddleware, lineasRouter)
 app.use('/api/v2/login',authRouter)
-app.use('/api/v2/zonas', zonaRouter)
+app.use('/api/v2/zonas', zonaRouter) //Aca es mas que nada una cuestión de login, si no cuando un user quiera crearse, no iba a poder.
 
 
 app.use((_, res) => {
