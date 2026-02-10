@@ -8,7 +8,7 @@ export class Repartidor {
     @PrimaryKey()
     id?: number
     @Property()
-    cuit!: number;
+    cuit!: String;
     @Property()
     apellidoNombre!: String;
     @Property()
