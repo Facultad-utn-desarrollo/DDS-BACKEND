@@ -1,6 +1,8 @@
 import 'reflect-metadata'
 import express from 'express'
 import cors from 'cors'
+import swaggerUi from 'swagger-ui-express'
+import { specs } from './swagger.js'
 import { clienteRouter } from './routes/clienteRoutes.js'
 import { repartidorRouter } from './routes/repartidorRourtes.js'
 import { tipoProductoRouter } from './routes/tipoProductoRoutes.js'
@@ -34,6 +36,13 @@ const corsOptions = {
   origin: allowedOrigins
 };
 app.use(cors(corsOptions));
+
+// Swagger documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
+  swaggerOptions: {
+    persistAuthorization: true,
+  },
+}));
 
 app.use('/api/v2/clientes', authMiddleware ,clienteRouter)
 app.use('/api/v2/repartidores', authMiddleware, repartidorRouter)
