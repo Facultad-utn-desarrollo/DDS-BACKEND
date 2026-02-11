@@ -4,6 +4,7 @@
 
 | Legajo | Apellido y Nombres |
 |:-------|:-------------------|
+| 47048 | Zarate, Exequiel |
 | 47094 | Martinez, Bruno |
 | 43814 | Aieta, Federico |
 | 42775 | Reinoso, Alfredo |
@@ -58,20 +59,22 @@ Sigue estos pasos para correr el backend en tu entorno local:
 
 ### a. Clonar el repositorio
 ```bash
-git clone [https://github.com/exe72418/DDS-BACKEND.git](https://github.com/exe72418/DDS-BACKEND.git)
+git clone https://github.com/exe72418/DDS-BACKEND.git
+```
+```bash
 cd DDS-BACKEND
-
+```
 ### b. Instalar dependencias
 ```bash
 npm install
-
+```
 ### c. Ejecutar la aplicación
 
 Para entorno de desarrollo:
 
 ```bash
 npm run start:dev
-
+```
 La aplicación estará disponible localmente en http://localhost:3000.
 
 ---
@@ -93,6 +96,8 @@ Hemos implementado Swagger/OpenAPI 3.0 para documentar todos los endpoints. Pued
 
 * **Localmente:** [http://localhost:3000/api-docs](http://localhost:3000/api-docs)
 
+---
+
 ## 5. Datos de Prueba (Testing)
 Para facilitar la corrección y pruebas de los roles, se proporcionan las siguientes credenciales:
 
@@ -101,9 +106,12 @@ Para facilitar la corrección y pruebas de los roles, se proporcionan las siguie
 * **Contraseña:** BrunoCliente12345
 
 **Rol: ADMINISTRADOR**
-* ****Usuario:** Bruno123
+* **Usuario:** Bruno123
 * **Contraseña:** Bruno123
+---
 
+## 6. Playlist de Vistas
+(En esta sección se agregarán próximamente los videos demostrativos del flujo de Usuario y Administrador)
 
 
 
