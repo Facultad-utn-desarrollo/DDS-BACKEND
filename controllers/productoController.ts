@@ -18,9 +18,13 @@ async function findAll(req: Request, res: Response) {
 
 async function findProductosActivos(req: Request, res: Response) {
   try {
-    const productos = await em.find(Producto, { disponible: true });
+    const productos = await em.find(Producto, { 
+        disponible: true,
+        stock: { $gt: 0 } 
+    });
+
     res.status(200).json({
-      message: 'Se encontraron los productos activos!',
+      message: 'Se encontraron los productos activos y con stock!',
       data: productos,
     });
   } catch (error: any) {

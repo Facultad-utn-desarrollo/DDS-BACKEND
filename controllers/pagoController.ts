@@ -9,7 +9,7 @@ const em = orm.em;
 
 async function findAll(req: Request, res: Response) {
   try {
-    const pagos = await em.find(Pago, {}, { populate: ['pedido', 'tipoPago'] });
+    const pagos = await em.find(Pago, {}, { populate: ['pedido', 'tipoPago', 'pedido.cliente'] });
     res.status(200).json({ message: 'Pagos encontrados', data: pagos });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
