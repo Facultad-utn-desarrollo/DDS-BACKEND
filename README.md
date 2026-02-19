@@ -41,7 +41,7 @@ La empresa de nuestro trabajo es un supermercado "FAST" que busca desarrollar un
 
 - **Documentación API:** Swagger (swagger-jsdoc v6.2.8 y swagger-ui-express v5.0.0) como generador de documentación para poder leer y probar los endpoints de la API.
 
-- **Gestor de paquetes:** pnpm (v9.0.4) para instalar todas las dependencias del backend.
+- **Gestor de paquetes:** npm (v11.6.2) para instalar todas las dependencias del backend.
 
 ---
 
