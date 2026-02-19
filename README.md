@@ -1,6 +1,6 @@
 # BACKEND Trabajo Práctico de Desarrollo de Software - Supermercado FAST
 
-## 👥 Integrantes
+## Integrantes
 
 | Legajo | Apellido y Nombres |
 |:-------|:-------------------|
@@ -9,7 +9,7 @@
 | 43814 | Aieta, Federico |
 | 42775 | Reinoso, Alfredo |
 
-## 🔗 Repositorios
+## Repositorios
 
 * **Frontend App:** [https://github.com/Facultad-utn-desarrollo/DDS-FRONTEND/tree/stable](https://github.com/Facultad-utn-desarrollo/DDS-FRONTEND/tree/stable)
 * **Backend App:** [https://github.com/Facultad-utn-desarrollo/DDS-BACKEND/tree/stable](https://github.com/Facultad-utn-desarrollo/DDS-BACKEND/tree/stable)
@@ -125,7 +125,40 @@ Una vez listo eso, podremos probar todos los endpoints (teniendo en cuenta que a
 
 ---
 
-## 6. Playlist de Vistas
+## 6. Testing 
+El proyecto cuenta con unos test de componentes automatizados desarrollados con Jest y Supertest. 
+Los mismos se pueden encontrar en **\test**
+
+### Automatizado por componentes
+
+- **productoUnitario.test.ts:** Verifica la lógica de negocio aislada dentro de las funciones del controlador, específicamente la función add de productoController. A diferencia del test de integración, este no levanta el servidor ni simula peticiones HTTP. En su lugar, simula ("mockea") directamente los objetos req y res de Express junto con la base de datos, validando que el código interno de la función asigne correctamente un estado 201 ante un caso de éxito, o que atrape las excepciones.
+- **clienteUnitario.test.ts:** Evalúa las funciones add y remove del controlador de clientes en total aislamiento. Comprueba el manejo de relaciones de base de datos (como devolver un error 404 si la zona asignada no existe) y confirma el correcto funcionamiento del borrado lógico, asegurando que el sistema cambie la disponibilidad del cliente a false en lugar de eliminar el registro. 
+- **repartidorUnitario.test.ts:** Testea la lógica aislada del controlador de repartidores, enfocándose en las validaciones estrictas de datos (como emitir un error 400 Bad Request si el usuario omite enviar la zona obligatoria durante la creación) y validando también la desactivación exitosa del repartidor manteniendo la integridad de los datos.
+
+### De integración
+
+- **producto.test.ts:** Valida qe se muestre el loguin, la interacción con los campos de entrada y la lógica de cambio entre los formularios de ingreso y registro del mismo.
+
+### Pre-requisitos para ejecutarlos
+Asegúrese de estar posicionado en la terminal dentro de la carpeta raíz del Backend
+
+1. Abrir una nueva consola y escribir para instalar las librerías de testing (si no se han instalado previamente):
+``` bash
+npm install --save-dev jest ts-jest supertest @types/jest @types/supertest
+```
+2. Asegúrese de que en su archivo package.json el script de test esté configurado para soportar módulos modernos (ESM). Debe tener esta línea en la sección "scripts":
+``` bash
+"test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+```
+3. Una vez verificado lo anterior, ejecutar:
+``` bash
+npm test
+```
+4. Finalmente en la terminal podrás visualizar el resultado de los mismos.
+
+---
+
+## 7. Playlist de Vistas
 (En esta sección se agregarán próximamente los videos demostrativos del flujo de Usuario y Administrador)
 
 
