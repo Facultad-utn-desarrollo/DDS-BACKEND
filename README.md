@@ -27,9 +27,9 @@ La empresa de nuestro trabajo es un supermercado "FAST" que busca desarrollar un
 
 ## 2. Información de la Aplicación
 
-- **Node.js:** El proyecto requiere Node.js v20 o superior para poder correr el código en el servidor.
+- **Node.js:** El proyecto requiere Node.js v20 o superior para ejecutar el servidor backend y las herramientas de desarrollo del frontend.
 
-- **Framework Web:** Express (v4.21.2) para armar la estructura de la API y manejar las rutas.
+- **Framework:** Express (v4.21.2) para armar la estructura de la API y manejar las rutas.
 
 - **ORM (Base de datos):** Mikro-ORM (v5.9) apuntando a una Base de Datos MySQL subida en **https://panel.filess.io/**.
 
