@@ -48,7 +48,7 @@ describe('Integración: Productos', () => {
     const res = await request(app).get('/api/v2/producto');
 
     // Imprimimos datos
-    console.log('\n🔵 [GET] Respuesta del servidor:', JSON.stringify(res.body, null, 2));
+    console.log('\n[GET] Respuesta del servidor:', JSON.stringify(res.body, null, 2));
 
     expect(res.status).toBe(200);
     expect(res.body.productos).toHaveLength(2);
@@ -73,7 +73,7 @@ describe('Integración: Productos', () => {
       .send(nuevoProducto);
 
     // Imprimimos los datos
-    console.log('\n🟢 [POST - Éxito] Respuesta del servidor:', JSON.stringify(res.body, null, 2));
+    console.log('\n[POST - Éxito] Respuesta del servidor:', JSON.stringify(res.body, null, 2));
 
     expect(res.status).toBe(201);
     expect(res.body.message).toContain('Producto creado');
@@ -97,7 +97,7 @@ describe('Integración: Productos', () => {
       .send(nuevoProducto);
 
     // Imprimimos
-    console.log('\n🔴 [POST - Error] Respuesta del servidor:', JSON.stringify(res.body, null, 2));
+    console.log('\n[POST - Error] Respuesta del servidor:', JSON.stringify(res.body, null, 2));
 
     expect(res.status).toBe(404);
     expect(mockEm.persistAndFlush).not.toHaveBeenCalled();
