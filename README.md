@@ -21,7 +21,9 @@
 ### Descripción
 La empresa de nuestro trabajo es un supermercado "FAST" que busca desarrollar una plataforma web para que los clientes puedan realizar pedidos de forma online. El sistema administra todo el ciclo de venta, desde la selección de productos hasta la entrega (delivery) y el pago, diferenciando roles entre Clientes y Administradores.
 
-[Hacer click aquí para acceder al modelo, alcances, etc.](https://github.com/BrunoMar99/tp/blob/fc37bd3851383300b3631d4459443cda8e70dfed/proposal.md)
+- Proposal: [Hacer click aquí](https://github.com/BrunoMar99/tp/blob/fc37bd3851383300b3631d4459443cda8e70dfed/proposal.md)
+- Trello: [Hacer click aquí](https://trello.com/invite/b/6620503434dd05d365b99496/ATTI867d255b6b2db2c7a96e0ef11a6976e6055451AE/trabajo-practico)
+- Toda la conversacion/organizacion fue a traves de Discord
 
 ---
 
@@ -159,7 +161,9 @@ npm test
 ---
 
 ## 7. Playlist de Vistas
-(En esta sección se agregarán próximamente los videos demostrativos del flujo de Usuario y Administrador)
+En esta seccion brindaremos el link a la playlist de videos mostrando la aplicación y el manejo de los roles.
+
+[Hacer click aquí](https://youtube.com/playlist?list=PLfm1QmpcGZxFqjhD5qURIUcmYd2H9kl27&si=gglMzCbjGbAkKWve)
 
 
 
